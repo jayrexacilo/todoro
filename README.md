@@ -4,23 +4,14 @@ A todo app + pomodoro timer TUI app.
 
 
 #### Installation
-npm
 ```
-npm install
-```
-yarn
-```
-yarn install
+npm install or yarn install
 ```
 
 #### Run
 npm
 ```
-npm start
-```
-yarn
-```
-yarn start
+npm start or yarn start
 ```
 
 
