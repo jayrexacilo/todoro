@@ -3,7 +3,7 @@ A todo app + pomodoro timer TUI app.
 
 
 
-#### Installation
+#### Install packages
 ```
 npm install or yarn install
 ```
