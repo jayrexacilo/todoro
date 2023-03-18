@@ -1,6 +1,8 @@
 # todoro
 A todo app + pomodoro timer TUI app.
 
+
+
 #### Installation
 npm
 ```
