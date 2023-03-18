@@ -1,20 +1,16 @@
 # todoro
 
-### Installation
-
-##### NPM
-
+#### Installation
+npm
 ```
 npm install
 ```
-
-##### Yarn
-
+yarn
 ```
 yarn install
 ```
 
-### Run
+#### Run
 npm
 ```
 npm start
@@ -28,4 +24,9 @@ A todo app + pomodoro timer TUI app.
 
 > #### TODO:
 >
-> - Pomodoro Timer 
+> - [ ] Pomodoro Timer
+> - [x] Todo list
+> > - [x] Add todo
+> > - [x] Edit todo
+> > - [x] Delete todo
+> > - [x] Show todos
