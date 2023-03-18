@@ -2,6 +2,6 @@
 
 A todo app + pomodoro timer TUI app.
 
-> TODO:
+> ####TODO:
 >
-> Pomodoro Timer 
+> - Pomodoro Timer 
