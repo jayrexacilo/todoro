@@ -9,7 +9,6 @@ npm install or yarn install
 ```
 
 #### Run
-npm
 ```
 npm start or yarn start
 ```
