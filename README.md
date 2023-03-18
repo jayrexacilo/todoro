@@ -25,6 +25,11 @@ A todo app + pomodoro timer TUI app.
 > #### TODO:
 >
 > - [ ] Pomodoro Timer
+> > - [ ] Start timer
+> > - [ ] Pause timer
+> > - [ ] Stop timer
+> > - [ ] Set focus time duration
+> > - [ ] Set break time duration
 > - [x] Todo list
 > > - [x] Add todo
 > > - [x] Edit todo
