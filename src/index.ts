@@ -31,6 +31,15 @@ process.stdin.on('keypress', (char, key) => {
     const kName = key.name;
 
     if(kName === 'x') process.exit();
+    if(kName === '`' && key.ctrl && key.sequence === '\x00' && todos?.length) {
+      todos = todos.map((item, i) => {
+        return {
+          ...item,
+          isDone: i === currMenuSelection ? !item.isDone : item.isDone
+        }
+      });
+      mainScreen(todos, currMenuSelection);
+    }
     if(kName === 'a') {
       currState = 'ADD_TODO';
       const res = addTodo('', '', todos);

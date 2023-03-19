@@ -15,7 +15,8 @@ function addTodo(input: string, name: string, todos: Todos[]) : {todos: Todos[],
   if(name === 'return') {
     todos.push({
       id: Date.now(),
-      label: userInput.join('')
+      label: userInput.join(''),
+      isDone: false
     });
     userInput = [];
     return {todos, isExit: true};

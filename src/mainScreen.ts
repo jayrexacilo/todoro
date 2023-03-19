@@ -8,7 +8,8 @@ function mainScreen(todos: Todos[], currTodoSelection: number): void {
   clear();
   if(todos?.length) {
     todos.map((item, i) => {
-      const logStr = '[ ] .'+item.label;
+      const isDone = item.isDone  ? '[x]' : '[ ]';
+      const logStr = isDone+' '+item.label;
       if(currTodoSelection === i) {
         log(chalk.green(logStr));
         return;
@@ -20,6 +21,7 @@ function mainScreen(todos: Todos[], currTodoSelection: number): void {
   }
   const commandStyle = (str: string) => chalk.bgWhite(chalk.black(str));
   log("\nCtrl+");
+  log(`${commandStyle('[space]')} Toggle Finish`);
   log(`${commandStyle('[s]')} Start timer     ${commandStyle('[a]')} Add      ${commandStyle('[e]')} Edit     ${commandStyle('[d]')} Delete     ${commandStyle('[x]')} Exit`);
 }
 
