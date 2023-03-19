@@ -1,10 +1,9 @@
 import readlineModule from 'readline';
-import chalk from 'chalk';
 import cliCursor from 'cli-cursor';
 import addTodo from './addTodo.js';
-import showTodos from './showTodos.js';
 import editTodo from './editTodo.js';
 import deleteTodo from './deleteTodo.js';
+import mainScreen from './mainScreen.js';
 
 cliCursor.hide();
 
@@ -13,33 +12,46 @@ const clear = console.clear;
 
 readlineModule.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
-const validUserInput: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ';
-const validSpecialChar: string = `~!@#$^&()_+={}[]|\/:;"'<,.`;
-const mainMenu: string[] = [
-  "Start todo",
-  "Add todo",
-  "Edit todo",
-  "Delete todo",
-  "Show todos"
-];
+const todosMenu: string[] = ['EDIT_TODO', 'DELETE_TODO', 'MAIN_SCREEN'];
 
-let currState = 'MAIN_MENU';
+let currState = 'MAIN_SCREEN';
 let currMenuSelection = 0;
 let todos: string[] = [];
 let selectedTodo: null | number = null;
+let isUserInputMode = false;
+const withMenuBindings = ['MAIN_MENU', 'EDIT_TODO', 'DELETE_TODO', 'MAIN_SCREEN'];
 
-printMenu(mainMenu, currMenuSelection, 'Menu');
+mainScreen(todos, currMenuSelection);
 
 process.stdin.on('keypress', (char, key) => {
   if (key.ctrl && key.name === 'c') process.exit();
 
-  if(currState === 'MAIN_MENU' ||
-    currState === 'EDIT_TODO' ||
-    currState === 'DELETE_TODO'
-  ) {
+  if(key.ctrl && currState === 'MAIN_SCREEN') {
+    const kName = key.name;
+
+    if(kName === 'x') process.exit();
+    if(kName === 'a') {
+      currState = 'ADD_TODO';
+      const res = addTodo('', '', todos);
+      todos = res.todos;
+    }
+    if(kName === 'e' && todos?.length && Array.isArray(todos)) {
+      currState = 'EDIT_TODO';
+      selectedTodo = currMenuSelection;
+      isUserInputMode = true;
+      editTodo(todos, currMenuSelection, selectedTodo, key.sequence, key.name);
+    }
+    if(kName === 'd' && todos?.length && Array.isArray(todos)) {
+      currState = 'DELETE_TODO';
+      selectedTodo = currMenuSelection;
+      deleteTodo(todos, currMenuSelection, currMenuSelection, key.sequence);
+    }
+    return;
+  }
+
+  if(withMenuBindings.includes(currState) && !isUserInputMode) {
     if(key && key.name == 'j') {
-      if((currMenuSelection === (mainMenu.length - 1) && currState === 'MAIN_MENU') ||
-        (currMenuSelection === (todos.length - 1) && ['EDIT_TODO', 'DELETE_TODO'].includes(currState))) {
+      if(currMenuSelection === (todos.length - 1) && todosMenu.includes(currState)) {
         currMenuSelection = 0;
       } else {
         currMenuSelection += 1;
@@ -48,11 +60,9 @@ process.stdin.on('keypress', (char, key) => {
     if(key && key.name == 'k') {
       if(currMenuSelection === 0) {
         switch(currState) {
-          case 'MAIN_MENU':
-            currMenuSelection = (mainMenu.length - 1);
-            break;
           case 'EDIT_TODO':
           case 'DELETE_TODO':
+          case 'MAIN_SCREEN':
             currMenuSelection = (todos.length - 1);
             break;
         }
@@ -62,6 +72,11 @@ process.stdin.on('keypress', (char, key) => {
     }
   }
 
+  if(currState === 'MAIN_SCREEN') {
+    mainScreen(todos, currMenuSelection);
+    return;
+  }
+
   if(currState === 'ADD_TODO') {
     const res = addTodo(key.sequence, key.name, todos);
     todos = res.todos;
@@ -69,29 +84,20 @@ process.stdin.on('keypress', (char, key) => {
       currMenuSelection = 0;
       if(res.todos?.length) {
         clear();
-        currState = 'SHOW_TODOS';
-        showTodos(todos);
+        currState = 'MAIN_SCREEN';
+        mainScreen(todos, todos?.length - 1);
         return;
       }
-      currState = 'MAIN_MENU';
-      printMenu(mainMenu, currMenuSelection, 'Menu');
     }
-    return;
-  }
-
-  if(currState === 'SHOW_TODOS') {
-    printMenu(mainMenu, 0, 'Menu');
-    currState = 'MAIN_MENU';
-    currMenuSelection = 0;
     return;
   }
 
   if(currState === 'EDIT_TODO') {
     if(key && key.name === 'escape') {
-      currState = 'MAIN_MENU';
+      currState = 'MAIN_SCREEN';
       currMenuSelection = 0;
       selectedTodo = null;
-      printMenu(mainMenu, currMenuSelection, 'Menu');
+      mainScreen(todos, todos?.length - 1);
       return;
     }
     if(key && key.name === 'return' && selectedTodo === null) {
@@ -103,86 +109,25 @@ process.stdin.on('keypress', (char, key) => {
 
     if(res.isExit) {
       currMenuSelection = 0;
-      currState = 'SHOW_TODOS';
+      currState = 'MAIN_SCREEN';
       selectedTodo = null;
-      showTodos(todos);
+      isUserInputMode = false;
+      mainScreen(todos, currMenuSelection);
     }
     return;
   }
 
   if(currState === 'DELETE_TODO') {
-    if(key && key.name === 'escape') {
-      currState = 'MAIN_MENU';
-      currMenuSelection = 0;
-      selectedTodo = null;
-      printMenu(mainMenu, currMenuSelection, 'Menu');
-      return;
-    }
-    if(key && key.name === 'return' && selectedTodo === null) {
-      selectedTodo = currMenuSelection;
-    }
-
     const res = deleteTodo(todos, currMenuSelection, selectedTodo, key.sequence);
     todos = res.todos;
 
     if(res.isExit) {
       clear();
       currMenuSelection = 0;
-      currState = 'SHOW_TODOS';
+      currState = 'MAIN_SCREEN';
       selectedTodo = null;
-      showTodos(todos);
+      mainScreen(todos, currMenuSelection);
     }
-    return;
-  }
-
-  if(currState === 'MAIN_MENU') {
-    if(key.name === 'return') {
-      clear();
-      if(currState === 'MAIN_MENU') {
-        const selectedMenu = mainMenu[currMenuSelection];
-        switch(selectedMenu) {
-          case 'Add todo':
-            currState = 'ADD_TODO';
-            const res = addTodo('', '', todos);
-            todos = res.todos;
-            break;
-          case 'Edit todo':
-            currState = 'EDIT_TODO';
-            currMenuSelection = 0;
-            editTodo(todos, currMenuSelection, null, key.sequence, key.name);
-            break;
-          case 'Delete todo':
-            currState = 'DELETE_TODO';
-            currMenuSelection = 0;
-            selectedTodo = null
-            deleteTodo(todos, currMenuSelection, selectedTodo, key.sequence);
-            break;
-          case 'Show todos':
-            currState = 'SHOW_TODOS';
-            showTodos(todos);
-            break;
-          default:
-            currState = 'START_TODO';
-            break;
-        }
-      }
-      return;
-    }
-
-    printMenu(mainMenu, currMenuSelection, 'Menu');
-
     return;
   }
 })
-
-function printMenu(menus: string[], currSelection: number, title: string) {
-  clear();
-  log(chalk.red('Menus'));
-  mainMenu.map((menu, i) => {
-    if(i === currMenuSelection) {
-      log(chalk.green(menu));
-      return;
-    }
-    log(menu)
-  });
-}
