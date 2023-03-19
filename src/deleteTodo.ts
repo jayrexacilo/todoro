@@ -1,12 +1,13 @@
 import chalk from 'chalk';
+import { Todos } from './types.js';
 
 const log = console.log;
 const clear = console.clear;
 
-function deleteTodo(todos: string[], currentSelection: number, selectedTodo: null | number, confirmation: string) : { todos: string[], isExit: boolean } {
+function deleteTodo(todos: Todos[], currentSelection: number, selectedTodo: null | number, confirmation: string) : { todos: Todos[], isExit: boolean } {
   if(selectedTodo !== null) {
     clear();
-    log(`Are you sure you want to delete ${todos[selectedTodo]}?`);
+    log(`Are you sure you want to delete ${todos[selectedTodo].label}?`);
     log('Press "y" to delete or "n" to cancel: ');
 
     const isConfirmed = confirmation === 'y' || confirmation === 'Y';

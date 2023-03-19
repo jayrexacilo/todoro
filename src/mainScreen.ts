@@ -1,14 +1,14 @@
 import chalk from 'chalk';
+import { Todos } from './types.js';
 
 const clear = console.clear;
 const log = console.log;
 
-function mainScreen(todos: string[], currTodoSelection: number): void {
+function mainScreen(todos: Todos[], currTodoSelection: number): void {
   clear();
   if(todos?.length) {
     todos.map((item, i) => {
-      const iNum = i+1;
-      const logStr = iNum+' .'+item;
+      const logStr = '[ ] .'+item.label;
       if(currTodoSelection === i) {
         log(chalk.green(logStr));
         return;

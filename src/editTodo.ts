@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { Todos } from  './types.js'
 
 const validUserInput: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ';
 const validSpecialChar: string = `~!@#$^&()_+={}[]|\/:;"'<,.`;
@@ -8,7 +9,7 @@ let updatedTodo: string[] = [];
 const log = console.log;
 const clear = console.clear;
 
-function editTodo(todos: string[], currSelection: number, selectedTodo: null | number, input: string, keyName: string): {todos: string[], isExit: boolean} {
+function editTodo(todos: Todos[], currSelection: number, selectedTodo: null | number, input: string, keyName: string): {todos: Todos[], isExit: boolean} {
   if(selectedTodo === null) {
     clear();
     log('Select todo');
@@ -39,9 +40,9 @@ function editTodo(todos: string[], currSelection: number, selectedTodo: null | n
 
   if(keyName === 'return' && selectedTodo !== null && updatedTodo?.length) {
     clear();
-    const newTodos: string[] = todos.map((todo, index) => {
+    const newTodos: Todos[] = todos.map((todo, index) => {
       if(currSelection === index) {
-        return updatedTodo.join('');
+        return {...todo, label: updatedTodo.join('')};
       }
       return todo;
     });
@@ -54,7 +55,7 @@ function editTodo(todos: string[], currSelection: number, selectedTodo: null | n
 
   if(selectedTodo !== null) {
     clear();
-    log('Editing => ', todos[currSelection]);
+    log('Editing => ', todos[currSelection].label);
     log('> ', updatedTodo.join(''));
 
     log('\nPress escape to cancel...');

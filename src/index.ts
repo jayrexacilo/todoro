@@ -4,6 +4,7 @@ import addTodo from './addTodo.js';
 import editTodo from './editTodo.js';
 import deleteTodo from './deleteTodo.js';
 import mainScreen from './mainScreen.js';
+import { Todos } from './types.js';
 
 cliCursor.hide();
 
@@ -16,7 +17,7 @@ const todosMenu: string[] = ['EDIT_TODO', 'DELETE_TODO', 'MAIN_SCREEN'];
 
 let currState = 'MAIN_SCREEN';
 let currMenuSelection = 0;
-let todos: string[] = [];
+let todos: Todos[] = [];
 let selectedTodo: null | number = null;
 let isUserInputMode = false;
 const withMenuBindings = ['MAIN_MENU', 'EDIT_TODO', 'DELETE_TODO', 'MAIN_SCREEN'];
