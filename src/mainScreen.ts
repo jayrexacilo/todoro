@@ -20,9 +20,10 @@ function mainScreen(todos: Todos[], currTodoSelection: number): void {
     log(chalk.red("Nothing todo here...."));
   }
   const commandStyle = (str: string) => chalk.bgWhite(chalk.black(str));
-  log("\nCtrl+");
-  log(`${commandStyle('[space]')} Toggle Finish`);
-  log(`${commandStyle('[s]')} Start timer     ${commandStyle('[a]')} Add      ${commandStyle('[e]')} Edit     ${commandStyle('[d]')} Delete     ${commandStyle('[x]')} Exit`);
+  log("\nCtrl+\n");
+  log(`${commandStyle('[space]')} Toggle Finish\n`);
+  log(`${commandStyle('[a]')} Add     ${commandStyle('[e]')} Edit     ${commandStyle('[d]')} Delete     ${commandStyle('[x]')} Exit\n`);
+  log(`${commandStyle('[s]')} Toggle focus      ${commandStyle('[z]')} Toggle Break`);
 }
 
 export default mainScreen;

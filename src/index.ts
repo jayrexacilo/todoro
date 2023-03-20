@@ -5,6 +5,9 @@ import editTodo from './editTodo.js';
 import deleteTodo from './deleteTodo.js';
 import mainScreen from './mainScreen.js';
 import { Todos } from './types.js';
+//@ts-ignore
+import cfonts from 'cfonts';
+import chalk from 'chalk';
 
 cliCursor.hide();
 
@@ -20,9 +23,83 @@ let currMenuSelection = 0;
 let todos: Todos[] = [];
 let selectedTodo: null | number = null;
 let isUserInputMode = false;
+let isTimerStarted = false;
+let isTimerStop = false;
+let focusTimerCount = 1500;
+let breakTimerCount = 300;
+let timerCount = 0;
 const withMenuBindings = ['MAIN_MENU', 'EDIT_TODO', 'DELETE_TODO', 'MAIN_SCREEN'];
 
 mainScreen(todos, currMenuSelection);
+
+const timerDisplay = (time: number) => {
+  const h = Math.floor(time / 3600).toString().padStart(2,'0'),
+      m = Math.floor(time % 3600 / 60).toString().padStart(2,'0'),
+      s = Math.floor(time % 60).toString().padStart(2,'0');
+    
+  const timeStr = h + ':' + m + ':' + s;
+
+  cfonts.say(timeStr.toString(), {
+    font: 'block',              // define the font face
+    align: 'center',              // define text alignment
+    colors: ['system'],         // define all colors
+    background: 'transparent',  // define the background color, you can also use `backgroundColor` here as key
+    letterSpacing: 1,           // define letter spacing
+    lineHeight: 1,              // define the line height
+    space: true,                // define if the output text should have empty lines on top and on the bottom
+    maxLength: '0',             // define how many character can be on one line
+    gradient: false,            // define your two gradient colors
+    independentGradient: false, // define if you want to recalculate the gradient for each new line
+    transitionGradient: false,  // define if this is a transition between colors directly
+    env: 'node'                 // define the environment cfonts is being executed in
+  });
+};
+
+const todoDisplay = (todo: string) => {
+  const cols = process.stdout.columns;
+  const spacerSize: number = (cols / 2) - todo.length;
+  let spacer = '';
+  for(let i=0; i<spacerSize; i++) {
+    spacer += ' ';
+  }
+  log(spacer+chalk.green(todo));
+};
+
+const stopTimer =() => {
+  isTimerStarted = false;
+  currState = 'MAIN_SCREEN';
+  currMenuSelection = 0;
+  timerCount = 0;
+  clear();
+  mainScreen(todos, currMenuSelection);
+  isTimerStop = false;
+};
+
+const timer = () => {
+  if(!isTimerStop && isTimerStarted && timerCount >= 0) {
+    setTimeout(() => {
+      const timerTitle = currState === 'START_FOCUS' ? todos[currMenuSelection].label : 'BREAK';
+      clear();
+      timerDisplay(timerCount);
+      todoDisplay(timerTitle);
+      timerCount -= 1;
+      if(!isTimerStop) timer();
+    }, 1000);
+    return;
+  }
+  stopTimer();
+};
+
+const toggleTimer = (time: number) => {
+  if(isTimerStarted && !isTimerStop) {
+    stopTimer();
+  } else {
+    isTimerStarted = true;
+    isTimerStop = false;
+    timerCount = time;
+    timer();
+  }
+};
 
 process.stdin.on('keypress', (char, key) => {
   if (key.ctrl && key.name === 'c') process.exit();
@@ -31,6 +108,14 @@ process.stdin.on('keypress', (char, key) => {
     const kName = key.name;
 
     if(kName === 'x') process.exit();
+    if(kName === 's' && todos?.length && !todos[currMenuSelection].isDone) {
+      currState = 'START_FOCUS';
+      toggleTimer(focusTimerCount);
+    }
+    if(kName === 'z') {
+      currState = 'START_BREAK';
+      toggleTimer(breakTimerCount);
+    }
     if(kName === '`' && key.ctrl && key.sequence === '\x00' && todos?.length) {
       todos = todos.map((item, i) => {
         return {
@@ -82,6 +167,15 @@ process.stdin.on('keypress', (char, key) => {
     }
   }
 
+  if(['START_FOCUS', 'START_BREAK'].includes(currState)) {
+    if(key.ctrl && ['s', 'z'].includes(key.name) && isTimerStarted) {
+      currState = 'MAIN_SCREEN'
+      currMenuSelection = 0;
+      stopTimer();
+      mainScreen(todos, currMenuSelection);
+    }
+    return;
+  }
   if(currState === 'MAIN_SCREEN') {
     mainScreen(todos, currMenuSelection);
     return;
