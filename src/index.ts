@@ -8,6 +8,8 @@ import { Todos } from './types.js';
 //@ts-ignore
 import cfonts from 'cfonts';
 import chalk from 'chalk';
+//@ts-ignore
+import notifier from 'node-notifier';
 
 cliCursor.hide();
 
@@ -25,7 +27,7 @@ let selectedTodo: null | number = null;
 let isUserInputMode = false;
 let isTimerStarted = false;
 let isTimerStop = false;
-let focusTimerCount = 1500;
+let focusTimerCount = 5;//1500;
 let breakTimerCount = 300;
 let timerCount = 0;
 const withMenuBindings = ['MAIN_MENU', 'EDIT_TODO', 'DELETE_TODO', 'MAIN_SCREEN'];
@@ -67,12 +69,12 @@ const todoDisplay = (todo: string) => {
 
 const stopTimer =() => {
   isTimerStarted = false;
+  isTimerStop = false;
   currState = 'MAIN_SCREEN';
   currMenuSelection = 0;
   timerCount = 0;
   clear();
   mainScreen(todos, currMenuSelection);
-  isTimerStop = false;
 };
 
 const timer = () => {
@@ -83,6 +85,13 @@ const timer = () => {
       timerDisplay(timerCount);
       todoDisplay(timerTitle);
       timerCount -= 1;
+      if(timerCount <= 0 && isTimerStarted && !isTimerStop) {
+        todos[currMenuSelection] = {...todos[currMenuSelection], isDone: true};
+        notifier.notify({
+          title: '1 Pomodoro down',
+          message: 'Please take a break now'
+        });
+      }
       if(!isTimerStop) timer();
     }, 1000);
     return;
@@ -169,10 +178,12 @@ process.stdin.on('keypress', (char, key) => {
 
   if(['START_FOCUS', 'START_BREAK'].includes(currState)) {
     if(key.ctrl && ['s', 'z'].includes(key.name) && isTimerStarted) {
-      currState = 'MAIN_SCREEN'
-      currMenuSelection = 0;
-      stopTimer();
-      mainScreen(todos, currMenuSelection);
+      while(isTimerStarted) {
+        currState = 'MAIN_SCREEN'
+        currMenuSelection = 0;
+        stopTimer();
+        mainScreen(todos, currMenuSelection);
+      }
     }
     return;
   }
