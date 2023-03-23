@@ -118,9 +118,10 @@ process.stdin.on('keypress', (char, key) => {
     if(screen.getIsUserInputMode()) {
       if(key.name === 'return') {
         todos.addTodo(screen.getTodoInputValue());
-        screen.clearUserInputValue();
-        screen.showMainScreen(todos.getTodos(), todos.getTodoLen() - 1, menu.getCurrentSubMenu());
         screen.setIsUserInputMode(false);
+        screen.clearUserInputValue();
+        menu.setCurrentMenu(todos.getTodoLen() - 1);
+        screen.showMainScreen(todos.getTodos(), menu.getCurrentMenu(), menu.getCurrentSubMenu());
         return;
       }
       screen.onAddTodo(key.sequence, key.name);
