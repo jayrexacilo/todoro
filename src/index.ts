@@ -51,6 +51,9 @@ process.stdin.on('keypress', (char, key) => {
     if(kName === 'z') {
       screen.setCurrentScreen('START_BREAK');
       timer.startBreakTimer();
+      let currTodo: any = todos.getTodoByIdx(menu.getCurrentMenu());
+      currTodo = menu.menuType === 'submenu' ? currTodo.subTodo[menu.currentSubMenu].todo : currTodo.todo;
+      timer.timerDisplay(timer.breakTimerCount, currTodo);
     }
     if(kName === '`' && key.ctrl && key.sequence === '\x00' && todos.getTodoLen()) {
       if(screen.getCurrentScreen() === 'MAIN_SCREEN') todos.toggleTodoStatus(menu.getCurrentMenu());
@@ -120,12 +123,19 @@ process.stdin.on('keypress', (char, key) => {
     }
   }
 
-  if(screen.getCurrentScreen() === 'START_FOCUS') {
+  if(['START_FOCUS', 'START_BREAK'].includes(screen.getCurrentScreen())) {
     if(key.ctrl && key.name === 's') {
       const timerStatus = timer.checkTimerStatus();
       if(timerStatus.isTimerPaused &&
         timerStatus.isTimerStarted) {
-        timer.startFocusTimer();
+        switch(screen.getCurrentScreen()) {
+          case 'START_FOCUS':
+            timer.startFocusTimer();
+            break;
+          case 'START_BREAK':
+            timer.startFocusTimer();
+            break;
+        }
         let currTodo: any = todos.getTodoByIdx(menu.getCurrentMenu());
         currTodo = menu.menuType === 'submenu' ? currTodo.subTodo[menu.currentSubMenu].todo : currTodo.todo;
         timer.timerDisplay(timer.timerCount, currTodo);
@@ -142,13 +152,13 @@ process.stdin.on('keypress', (char, key) => {
     if(key.ctrl && key.name === 'q') {
       while(!timer.checkTimerStatus().isTimerStop) {
         timer.stopTimer();
+        clearTimeout(timer.timeout);
       }
       if(timer.checkTimerStatus().isTimerStop) {
         setTimeout(() => {
           clear();
-          screen.setCurrentScreen('MAIN_MENU');
+          screen.setCurrentScreen(menu.menuType === 'submenu' ? 'SUBTODO' : 'MAIN_MENU');
           screen.showMainScreen(todos.getTodos(), menu.getCurrentMenu(), menu.getCurrentSubMenu());
-          menu.menuType = 'mainmenu';
         }, 700);
       }
     }
