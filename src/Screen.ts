@@ -43,14 +43,16 @@ class Screen {
     if(todos?.length) {
       todos.map((item, i) => {
         const isDone = item.isDone  ? '[x]' : '[ ]';
-        const logStr = isDone+' '+item.todo;
+        let logStr = isDone+' '+item.todo;
         if(currentMenu === i) {
+          logStr = this.currentScreen !== 'SUBTODO' ? logStr+' *' : logStr;
           log(chalk.green(logStr));
           if(item.subTodo?.length) {
             item.subTodo.map((subItem: subTodoType, i: number) => {
               const isDone = subItem.isDone ? '[x]' : '[ ]';
-              const logStr = isDone+' '+subItem.todo;
+              let logStr = isDone+' '+subItem.todo;
               if(currentSubMenu === i) {
+                logStr = this.currentScreen === 'SUBTODO' ? logStr+' *' : logStr;
                 log('   '+chalk.green(logStr));
                 return;
               }
@@ -119,6 +121,9 @@ class Screen {
     this.onUserInput(input, keyName, 'addsub', currentTodo);
   }
   onEditTodo(input: string, keyName: string, currentTodo: string) {
+    this.onUserInput(input, keyName, 'edit', currentTodo);
+  }
+  onEditSubTodo(input: string, keyName: string, currentTodo: string) {
     this.onUserInput(input, keyName, 'edit', currentTodo);
   }
   onDeleteTodo(todo: string) {

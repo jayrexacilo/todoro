@@ -37,6 +37,9 @@ class Todo {
   updateTodo(todo: string, idx: number) {
     this.todos[idx].todo = todo;
   }
+  updateSubTodo(todo: string, idx: number, subidx: number) {
+    this.todos[idx].subTodo[subidx].todo = todo;
+  }
   getTodoByIdx(idx: number) {
     return this.todos[idx];
   }

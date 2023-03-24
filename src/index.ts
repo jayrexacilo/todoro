@@ -66,7 +66,7 @@ process.stdin.on('keypress', (char, key) => {
       screen.setIsUserInputMode(true);
     }
     if(kName === 'e' && todos.getTodoLen()) {
-      screen.setCurrentScreen('EDIT_TODO');
+      screen.setCurrentScreen(menu.menuType === 'mainmenu' ? 'EDIT_TODO' : 'EDIT_SUBTODO');
       screen.setIsUserInputMode(true);
     }
     if(kName === 'd' && todos.getTodoLen()) {
@@ -181,20 +181,32 @@ process.stdin.on('keypress', (char, key) => {
     }
   }
 
-  if(screen.getCurrentScreen() === 'EDIT_TODO') {
+  if(['EDIT_TODO', 'EDIT_SUBTODO'].includes(screen.getCurrentScreen())) {
     if(key && key.name === 'escape') {
       screen.showMainScreen(todos.getTodos(), menu.getCurrentMenu(), menu.getCurrentSubMenu());
       return;
     }
     if(key && key.name === 'return') {
-      todos.updateTodo(screen.getTodoInputValue(), menu.getCurrentMenu());
+      switch(screen.getCurrentScreen()) {
+        case 'EDIT_TODO':
+          todos.updateTodo(screen.getTodoInputValue(), menu.getCurrentMenu());
+          break;
+        case 'EDIT_SUBTODO':
+          todos.updateSubTodo(screen.getTodoInputValue(), menu.getCurrentMenu(), menu.getCurrentSubMenu());
+          menu.menuType = 'submenu';
+          screen.setCurrentScreen('SUBTODO');
+          break;
+      }
       screen.showMainScreen(todos.getTodos(), menu.getCurrentMenu(), menu.getCurrentSubMenu());
       screen.setIsUserInputMode(false);
       screen.clearUserInputValue();
       return;
     }
 
-    screen.onEditTodo(key.sequence, key.name, todos.getTodoByIdx(menu.getCurrentMenu()).todo);
+    let currTodo: any = todos.getTodoByIdx(menu.getCurrentMenu());
+    currTodo = menu.menuType === 'submenu' ? currTodo.subTodo[menu.currentSubMenu].todo : currTodo.todo;
+    if(menu.menuType === 'submenu') return screen.onEditSubTodo(key.sequence, key.name, currTodo);
+    screen.onEditTodo(key.sequence, key.name, currTodo);
     return;
   }
 
