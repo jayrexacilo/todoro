@@ -45,14 +45,12 @@ class Screen {
         const isDone = item.isDone  ? '[x]' : '[ ]';
         let logStr = isDone+' '+item.todo;
         if(currentMenu === i) {
-          logStr = this.currentScreen !== 'SUBTODO' ? logStr+' *' : logStr;
-          log(chalk.green(logStr));
+          log(this.currentScreen === 'SUBTODO' ? logStr : chalk.green(logStr));
           if(item.subTodo?.length) {
             item.subTodo.map((subItem: subTodoType, i: number) => {
               const isDone = subItem.isDone ? '[x]' : '[ ]';
               let logStr = isDone+' '+subItem.todo;
-              if(currentSubMenu === i) {
-                logStr = this.currentScreen === 'SUBTODO' ? logStr+' *' : logStr;
+              if(currentSubMenu === i && this.currentScreen === 'SUBTODO') {
                 log('   '+chalk.green(logStr));
                 return;
               }
