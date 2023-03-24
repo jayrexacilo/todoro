@@ -34,13 +34,19 @@ process.stdin.on('keypress', (char, key) => {
       menu.setCurrentSubMenu(0);
       if(screen.getCurrentScreen() === 'SUBTODO') {
         screen.setCurrentScreen('MAIN_SCREEN');
+        menu.menuType = 'mainmenu';
       } else {
         screen.setCurrentScreen('SUBTODO');
+        menu.menuType = 'submenu';
       }
     }
     if(kName === 's' && todos.getTodoLen() && !todos.getTodoByIdx(menu.getCurrentMenu()).isDone) {
       screen.setCurrentScreen('START_FOCUS');
       timer.startFocusTimer();
+      let currTodo: any = todos.getTodoByIdx(menu.getCurrentMenu());
+      currTodo = menu.menuType === 'submenu' ? currTodo.subTodo[menu.currentSubMenu].todo : currTodo.todo;
+      timer.timerDisplay(timer.focusTimerCount, currTodo);
+      return;
     }
     if(kName === 'z') {
       screen.setCurrentScreen('START_BREAK');
@@ -114,6 +120,40 @@ process.stdin.on('keypress', (char, key) => {
     }
   }
 
+  if(screen.getCurrentScreen() === 'START_FOCUS') {
+    if(key.ctrl && key.name === 's') {
+      const timerStatus = timer.checkTimerStatus();
+      if(timerStatus.isTimerPaused &&
+        timerStatus.isTimerStarted) {
+        timer.startFocusTimer();
+        let currTodo: any = todos.getTodoByIdx(menu.getCurrentMenu());
+        currTodo = menu.menuType === 'submenu' ? currTodo.subTodo[menu.currentSubMenu].todo : currTodo.todo;
+        timer.timerDisplay(timer.timerCount, currTodo);
+        return;
+      }
+      if(!timer.checkTimerStatus().isTimerPaused) {
+        while(!timer.checkTimerStatus().isTimerPaused) {
+          timer.pauseTimer();
+          clearTimeout(timer.timeout);
+        }
+      }
+      return;
+    }
+    if(key.ctrl && key.name === 'q') {
+      while(!timer.checkTimerStatus().isTimerStop) {
+        timer.stopTimer();
+      }
+      if(timer.checkTimerStatus().isTimerStop) {
+        setTimeout(() => {
+          clear();
+          screen.setCurrentScreen('MAIN_MENU');
+          screen.showMainScreen(todos.getTodos(), menu.getCurrentMenu(), menu.getCurrentSubMenu());
+          menu.menuType = 'mainmenu';
+        }, 700);
+      }
+    }
+    return;
+  }
   if(screen.getCurrentScreen() === 'ADD_TODO') {
     if(screen.getIsUserInputMode()) {
       if(key.name === 'return') {
@@ -130,6 +170,7 @@ process.stdin.on('keypress', (char, key) => {
   if(screen.getCurrentScreen() === 'ADD_SUBTODO') {
     if(screen.getIsUserInputMode()) {
       if(key.name === 'return') {
+        todos.getTodoByIdx(menu.getCurrentMenu()).isDone = false;
         todos.addSubTodo(screen.getTodoInputValue(), menu.getCurrentMenu());
         screen.clearUserInputValue();
         screen.showMainScreen(todos.getTodos(), menu.getCurrentMenu(), menu.getCurrentSubMenu());

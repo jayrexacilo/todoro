@@ -1,6 +1,7 @@
 class Menu {
   currentMenu: number;
   currentSubMenu: number = 0;
+  menuType: string = 'mainmenu';
   constructor(currentMenu: number) {
     this.currentMenu = currentMenu;
   }

@@ -1,10 +1,16 @@
 //@ts-ignore
 import cfonts from 'cfonts';
+import chalk from 'chalk';
+
+const clear = console.clear;
+const log = console.log;
 
 class Timer {
-  private timerCount: number = 0;
   private isTimerStarted: boolean = false;
   private isTimerStop: boolean = true;
+  timeout: ReturnType<typeof setTimeout> | undefined;
+  timerCount: number = 0;
+  isTimerPaused: boolean = false;
   focusTimerCount: number;
   breakTimerCount: number;
 
@@ -16,28 +22,39 @@ class Timer {
     this.breakTimerCount = breakTimerCount;
   }
 
-  startFocusTimer() {
-    this.timerCount = this.focusTimerCount;
+  onStartTimer() {
     this.isTimerStarted = true;
     this.isTimerStop = false;
+    this.isTimerPaused = false;
+  }
+  startFocusTimer() {
+    this.onStartTimer();
   }
   startBreakTimer() {
-    this.timerCount = this.breakTimerCount;
-    this.isTimerStarted = true;
-    this.isTimerStop = false;
+    this.onStartTimer();
+  }
+  pauseTimer() {
+    this.isTimerPaused = true;
   }
   stopTimer() {
-    this.timerCount = 0;
     this.isTimerStarted = false;
     this.isTimerStop = true;
   }
-  timerDisplay(time: number) {
+  checkTimerStatus() {
+    return {
+      isTimerStarted: this.isTimerStarted,
+      isTimerStop: this.isTimerStop,
+      isTimerPaused: this.isTimerPaused
+    }
+  }
+  timerDisplay(time: number, todo: string) {
     const h = Math.floor(time / 3600).toString().padStart(2,'0'),
         m = Math.floor(time % 3600 / 60).toString().padStart(2,'0'),
         s = Math.floor(time % 60).toString().padStart(2,'0');
       
-    const timeStr = h + ':' + m + ':' + s;
+    const timeStr = m + ':' + s;
 
+    clear();
     cfonts.say(timeStr.toString(), {
       font: 'block',              // define the font face
       align: 'center',              // define text alignment
@@ -52,6 +69,16 @@ class Timer {
       transitionGradient: false,  // define if this is a transition between colors directly
       env: 'node'                 // define the environment cfonts is being executed in
     });
+
+    log(chalk.green(todo));
+
+    this.timerCount = time - 1;
+    if(this.timerCount > 0 &&
+      this.isTimerStarted &&
+      (!this.isTimerStop || !this.isTimerPaused)
+    ) {
+      this.timeout = setTimeout(() => this.timerDisplay(this.timerCount, todo), 1000);
+    }
   }
 }
 
