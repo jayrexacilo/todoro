@@ -45,7 +45,7 @@ process.stdin.on('keypress', (char, key) => {
       timer.startFocusTimer();
       let currTodo: any = todos.getTodoByIdx(menu.getCurrentMenu());
       currTodo = menu.menuType === 'submenu' ? currTodo.subTodo[menu.currentSubMenu].todo : currTodo.todo;
-      timer.timerDisplay(timer.focusTimerCount, currTodo);
+      timer.timerDisplay(timer.focusTimerCount, currTodo, 'focus');
       return;
     }
     if(kName === 'z') {
@@ -53,7 +53,7 @@ process.stdin.on('keypress', (char, key) => {
       timer.startBreakTimer();
       let currTodo: any = todos.getTodoByIdx(menu.getCurrentMenu());
       currTodo = menu.menuType === 'submenu' ? currTodo.subTodo[menu.currentSubMenu].todo : currTodo.todo;
-      timer.timerDisplay(timer.breakTimerCount, currTodo);
+      timer.timerDisplay(timer.breakTimerCount, currTodo, 'break');
     }
     if(kName === '`' && key.ctrl && key.sequence === '\x00' && todos.getTodoLen()) {
       if(screen.getCurrentScreen() === 'MAIN_SCREEN') todos.toggleTodoStatus(menu.getCurrentMenu());
@@ -138,7 +138,7 @@ process.stdin.on('keypress', (char, key) => {
         }
         let currTodo: any = todos.getTodoByIdx(menu.getCurrentMenu());
         currTodo = menu.menuType === 'submenu' ? currTodo.subTodo[menu.currentSubMenu].todo : currTodo.todo;
-        timer.timerDisplay(timer.timerCount, currTodo);
+        timer.timerDisplay(timer.timerCount, currTodo, screen.getCurrentScreen() === 'START_FOCUS' ? 'focus' : 'break');
         return;
       }
       if(!timer.checkTimerStatus().isTimerPaused) {

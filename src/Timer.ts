@@ -47,7 +47,8 @@ class Timer {
       isTimerPaused: this.isTimerPaused
     }
   }
-  timerDisplay(time: number, todo: string) {
+  timerDisplay(time: number, todo: string, type: string) {
+    const cols = process.stdout.columns
     const h = Math.floor(time / 3600).toString().padStart(2,'0'),
         m = Math.floor(time % 3600 / 60).toString().padStart(2,'0'),
         s = Math.floor(time % 60).toString().padStart(2,'0');
@@ -70,14 +71,17 @@ class Timer {
       env: 'node'                 // define the environment cfonts is being executed in
     });
 
-    log(chalk.green(todo));
+    const spacerStr: any = (n: number) => Array.apply(null, Array(n)).map(i => " ").join('');
+
+    log(spacerStr((cols / 2) - type.length)+chalk.red(type.toUpperCase())+"\n");
+    if(type === 'focus') log(spacerStr((cols / 2) - todo.length)+chalk.green(todo));
 
     this.timerCount = time - 1;
     if(this.timerCount > 0 &&
       this.isTimerStarted &&
       (!this.isTimerStop || !this.isTimerPaused)
     ) {
-      this.timeout = setTimeout(() => this.timerDisplay(this.timerCount, todo), 1000);
+      this.timeout = setTimeout(() => this.timerDisplay(this.timerCount, todo, type), 1000);
     }
   }
 }
