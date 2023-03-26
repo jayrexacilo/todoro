@@ -15,14 +15,14 @@ npm start or yarn start
 
 
 
-> #### TODO:
+> #### MVP TODO:
 >
-> - [ ] Pomodoro Timer
-> > - [ ] Start timer
-> > - [ ] Pause timer
-> > - [ ] Stop timer
-> > - [ ] Set focus time duration
-> > - [ ] Set break time duration
+> - [x] Pomodoro Timer
+> > - [x] Start timer
+> > - [x] Pause timer
+> > - [x] Stop timer
+> > - [x] Set focus time duration
+> > - [x] Set break time duration
 > - [x] Todo list
 > > - [x] Add todo
 > > - [x] Edit todo
