@@ -52,8 +52,9 @@ process.stdin.on('keypress', (char, key) => {
       screen.setCurrentScreen('START_BREAK');
       timer.startBreakTimer();
       let currTodo: any = todos.getTodoByIdx(menu.getCurrentMenu());
-      currTodo = menu.menuType === 'submenu' ? currTodo.subTodo[menu.currentSubMenu].todo : currTodo.todo;
+      currTodo = '';
       timer.timerDisplay(timer.breakTimerCount, currTodo, 'break');
+      return;
     }
     if(kName === 'o') {
       screen.setCurrentScreen('SET_FOCUS_TIMER');
@@ -154,7 +155,9 @@ process.stdin.on('keypress', (char, key) => {
     return;
   }
   if(['START_FOCUS', 'START_BREAK'].includes(screen.getCurrentScreen())) {
-    if(key.ctrl && key.name === 's') {
+    const isToggleBreakTimer = key.name === 'z' && screen.getCurrentScreen() === 'START_BREAK';
+    const isToggleFocusTimer = key.name === 's' && screen.getCurrentScreen() === 'START_FOCUS';
+    if(key.ctrl && (isToggleBreakTimer || isToggleFocusTimer)) {
       const timerStatus = timer.checkTimerStatus();
       if(timerStatus.isTimerPaused &&
         timerStatus.isTimerStarted) {
@@ -163,11 +166,11 @@ process.stdin.on('keypress', (char, key) => {
             timer.startFocusTimer();
             break;
           case 'START_BREAK':
-            timer.startFocusTimer();
+            timer.startBreakTimer();
             break;
         }
         let currTodo: any = todos.getTodoByIdx(menu.getCurrentMenu());
-        currTodo = menu.menuType === 'submenu' ? currTodo.subTodo[menu.currentSubMenu].todo : currTodo.todo;
+        currTodo = menu.menuType === 'submenu' ? currTodo.subTodo[menu.currentSubMenu].todo : isToggleBreakTimer ? '' : currTodo.todo;
         timer.timerDisplay(timer.timerCount, currTodo, screen.getCurrentScreen() === 'START_FOCUS' ? 'focus' : 'break');
         return;
       }
