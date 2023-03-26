@@ -81,6 +81,8 @@ class Screen {
       timerDisplayCommands+= `${commandStyle('[s]')} Toggle focus\n`;
       timerDisplayCommands += `${commandStyle('[z]')} Toggle Break\n`;
       timerDisplayCommands += `${commandStyle('[q]')} Stop\n`;
+      timerDisplayCommands += `${commandStyle('[o]')} Set focus time\n`;
+      timerDisplayCommands += `${commandStyle('[p]')} Set break time`;
 
       let todoDisplayCommands = '\n----------TODO-----------\n';
       todoDisplayCommands += `${commandStyle('[a]')} Add\n`;
@@ -109,8 +111,21 @@ class Screen {
     if(type === 'edit') {
       title = 'Editing: '+currentTodo;
     }
+    if(type === 'setFocusTime' || type === 'setBreakTime') {
+      title = `Set focus time: \ncurrent: ${currentTodo}mins`;
+      if(!+input && +input != 0 && this.userInput?.length) {
+        title += chalk.red('\nInvalid input');
+        this.userInput.pop();
+      }
+    }
     log(title);
     log('> ', this.userInput.join(''));
+  }
+  onSetFocusTime(input: string, keyName: string, currentTime: string) {
+    this.onUserInput(input, keyName, 'setFocusTime', currentTime);
+  }
+  onSetBreakTime(input: string, keyName: string, currentTime: string) {
+    this.onUserInput(input, keyName, 'setBreakTime', currentTime);
   }
   onAddTodo(input: string, keyName: string) {
     this.onUserInput(input, keyName, 'add');
@@ -129,7 +144,7 @@ class Screen {
     log(`Are you sure you want to delete ${todo}?`);
     log('Press "y" to delete or "n" to cancel: ');
   }
-  getTodoInputValue() {
+  getInputValue() {
     return this.userInput.join('');
   }
   clearUserInputValue() {

@@ -15,11 +15,11 @@ class Timer {
   breakTimerCount: number;
 
   constructor(
-    focusTimerCount: number,
-    breakTimerCount: number
+    focusTimerCount: number = 1500,
+    breakTimerCount: number = 300
   ){
     this.focusTimerCount = focusTimerCount;
-    this.breakTimerCount = breakTimerCount;
+    this.breakTimerCount = breakTimerCount
   }
 
   onStartTimer() {

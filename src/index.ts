@@ -18,7 +18,7 @@ const todosMenu: string[] = ['EDIT_TODO', 'DELETE_TODO', 'MAIN_SCREEN', 'SUBTODO
 const screen = new Screen('MAIN_SCREEN');
 const todos = new Todo([]);
 const menu = new Menu(0);
-const timer = new Timer(1500, 300);
+const timer = new Timer();
 
 screen.showMainScreen(todos.getTodos(), menu.getCurrentMenu(), menu.getCurrentSubMenu());
 
@@ -54,6 +54,12 @@ process.stdin.on('keypress', (char, key) => {
       let currTodo: any = todos.getTodoByIdx(menu.getCurrentMenu());
       currTodo = menu.menuType === 'submenu' ? currTodo.subTodo[menu.currentSubMenu].todo : currTodo.todo;
       timer.timerDisplay(timer.breakTimerCount, currTodo, 'break');
+    }
+    if(kName === 'o') {
+      screen.setCurrentScreen('SET_FOCUS_TIMER');
+    }
+    if(kName === 'p') {
+      screen.setCurrentScreen('SET_BREAK_TIMER');
     }
     if(kName === '`' && key.ctrl && key.sequence === '\x00' && todos.getTodoLen()) {
       if(screen.getCurrentScreen() === 'MAIN_SCREEN') todos.toggleTodoStatus(menu.getCurrentMenu());
@@ -123,6 +129,30 @@ process.stdin.on('keypress', (char, key) => {
     }
   }
 
+  if(screen.getCurrentScreen() === 'SET_FOCUS_TIMER') {
+    if(key.name === 'return') {
+      timer.focusTimerCount = +screen.getInputValue() * 60;
+      screen.setIsUserInputMode(false);
+      screen.clearUserInputValue();
+      screen.setCurrentScreen('MAIN_SCREEN');
+      screen.showMainScreen(todos.getTodos(), menu.getCurrentMenu(), menu.getCurrentSubMenu());
+      return;
+    }
+    screen.onSetFocusTime(key.sequence, key.name, (timer.focusTimerCount / 60).toString());
+    return;
+  }
+  if(screen.getCurrentScreen() === 'SET_BREAK_TIMER') {
+    if(key.name === 'return') {
+      timer.breakTimerCount = +screen.getInputValue() * 60;
+      screen.setIsUserInputMode(false);
+      screen.clearUserInputValue();
+      screen.setCurrentScreen('MAIN_SCREEN');
+      screen.showMainScreen(todos.getTodos(), menu.getCurrentMenu(), menu.getCurrentSubMenu());
+      return;
+    }
+    screen.onSetBreakTime(key.sequence, key.name, (timer.breakTimerCount / 60).toString());
+    return;
+  }
   if(['START_FOCUS', 'START_BREAK'].includes(screen.getCurrentScreen())) {
     if(key.ctrl && key.name === 's') {
       const timerStatus = timer.checkTimerStatus();
@@ -167,7 +197,7 @@ process.stdin.on('keypress', (char, key) => {
   if(screen.getCurrentScreen() === 'ADD_TODO') {
     if(screen.getIsUserInputMode()) {
       if(key.name === 'return') {
-        todos.addTodo(screen.getTodoInputValue());
+        todos.addTodo(screen.getInputValue());
         screen.setIsUserInputMode(false);
         screen.clearUserInputValue();
         menu.setCurrentMenu(todos.getTodoLen() - 1);
@@ -181,7 +211,7 @@ process.stdin.on('keypress', (char, key) => {
     if(screen.getIsUserInputMode()) {
       if(key.name === 'return') {
         todos.getTodoByIdx(menu.getCurrentMenu()).isDone = false;
-        todos.addSubTodo(screen.getTodoInputValue(), menu.getCurrentMenu());
+        todos.addSubTodo(screen.getInputValue(), menu.getCurrentMenu());
         screen.clearUserInputValue();
         screen.showMainScreen(todos.getTodos(), menu.getCurrentMenu(), menu.getCurrentSubMenu());
         screen.setIsUserInputMode(false);
@@ -199,10 +229,10 @@ process.stdin.on('keypress', (char, key) => {
     if(key && key.name === 'return') {
       switch(screen.getCurrentScreen()) {
         case 'EDIT_TODO':
-          todos.updateTodo(screen.getTodoInputValue(), menu.getCurrentMenu());
+          todos.updateTodo(screen.getInputValue(), menu.getCurrentMenu());
           break;
         case 'EDIT_SUBTODO':
-          todos.updateSubTodo(screen.getTodoInputValue(), menu.getCurrentMenu(), menu.getCurrentSubMenu());
+          todos.updateSubTodo(screen.getInputValue(), menu.getCurrentMenu(), menu.getCurrentSubMenu());
           menu.menuType = 'submenu';
           screen.setCurrentScreen('SUBTODO');
           break;
