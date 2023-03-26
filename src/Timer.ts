@@ -71,7 +71,7 @@ class Timer {
       env: 'node'                 // define the environment cfonts is being executed in
     });
 
-    const spacerStr: any = (n: number) => Array.apply(null, Array(n)).map(i => " ").join('');
+    const spacerStr: any = (n: number) => n <= 0 ? '' : Array.apply(null, Array(n)).map(i => " ").join('');
 
     log(spacerStr((cols / 2) - type.length)+chalk.red(type.toUpperCase())+"\n");
     if(type === 'focus') log(spacerStr((cols / 2) - todo.length)+chalk.green(todo));
