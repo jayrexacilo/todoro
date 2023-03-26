@@ -13,7 +13,7 @@ npm install or yarn install
 npm start or yarn start
 ```
 
-##### There will be more features to be added in the future but for now, it will stay as it is :)
+##### There will be more features to be added in the future but for now, it will stays as it is :)
 
 
 > #### MVP TODO:
