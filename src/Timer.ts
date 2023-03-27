@@ -54,33 +54,40 @@ class Timer {
     }
   }
   timerDisplay(time: number, todo: string, type: string) {
-    const cols = process.stdout.columns
+    const cols = process.stdout.columns;
+    const rows = process.stdout.rows;
     const h = Math.floor(time / 3600).toString().padStart(2,'0'),
         m = Math.floor(time % 3600 / 60).toString().padStart(2,'0'),
         s = Math.floor(time % 60).toString().padStart(2,'0');
       
     const timeStr = m + ':' + s;
+    const addSpacerStr: any = (n: number) => !+n || n <= 0 ? '' : Array.apply(null, Array(n)).map(i => " ").join('');
 
     clear();
-    cfonts.say(timeStr.toString(), {
-      font: 'block',              // define the font face
-      align: 'center',              // define text alignment
-      colors: ['system'],         // define all colors
-      background: 'transparent',  // define the background color, you can also use `backgroundColor` here as key
-      letterSpacing: 1,           // define letter spacing
-      lineHeight: 1,              // define the line height
-      space: true,                // define if the output text should have empty lines on top and on the bottom
-      maxLength: '0',             // define how many character can be on one line
-      gradient: false,            // define your two gradient colors
-      independentGradient: false, // define if you want to recalculate the gradient for each new line
-      transitionGradient: false,  // define if this is a transition between colors directly
-      env: 'node'                 // define the environment cfonts is being executed in
-    });
+    if(cols < 150 || rows < 150) {
+      log("\n"+addSpacerStr((cols / 2) - timeStr.toString().length)+timeStr.toString()+"\n");
+    } else {
+      cfonts.say(timeStr.toString(), {
+        font: 'block',              // define the font face
+        align: 'center',              // define text alignment
+        colors: ['system'],         // define all colors
+        background: 'transparent',  // define the background color, you can also use `backgroundColor` here as key
+        letterSpacing: 1,           // define letter spacing
+        lineHeight: 1,              // define the line height
+        space: true,                // define if the output text should have empty lines on top and on the bottom
+        maxLength: '0',             // define how many character can be on one line
+        gradient: false,            // define your two gradient colors
+        independentGradient: false, // define if you want to recalculate the gradient for each new line
+        transitionGradient: false,  // define if this is a transition between colors directly
+        env: 'node'                 // define the environment cfonts is being executed in
+      });
+    }
 
-    const spacerStr: any = (n: number) => n <= 0 ? '' : Array.apply(null, Array(n)).map(i => " ").join('');
+    const titleSpaceStr = !+cols || !type?.length ? '' : addSpacerStr((cols / 2) - type.length);
+    const todoSpaceStr = !+cols || !todo?.length ? '' : addSpacerStr((cols / 2) - todo.length);
 
-    log(spacerStr((cols / 2) - type.length)+chalk.red(type.toUpperCase())+"\n");
-    if(type === 'focus') log(spacerStr((cols / 2) - todo.length)+chalk.green(todo));
+    log(titleSpaceStr+chalk.red(type.toUpperCase())+"\n");
+    if(type === 'focus') log(todoSpaceStr+chalk.green(todo));
 
     this.timerCount = time - 1;
 
