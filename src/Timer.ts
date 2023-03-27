@@ -6,6 +6,7 @@ import notifier from 'node-notifier';
 //@ts-ignore
 import sound from 'sound-play';
 import { exec } from "child_process";
+import process, { cwd } from "process";
 
 const clear = console.clear;
 const log = console.log;
@@ -20,7 +21,7 @@ class Timer {
   breakTimerCount: number;
 
   constructor(
-    focusTimerCount: number = 3,
+    focusTimerCount: number = 1500,
     breakTimerCount: number = 300
   ){
     this.focusTimerCount = focusTimerCount;
@@ -95,8 +96,10 @@ class Timer {
         title: type === 'focus' ? 'Focus is done!' : 'Break is done!',
         message: type === 'focus' ? 'Take a break now.' : 'Time to work!'
       });
-      exec("mpv --audio-display=no ~/Twitch/nodejs/todoro/src/timer-alarm.wav");
-
+      exec(`mpv --audio-display=no ${cwd()}/src/timer-alarm.wav`);
+      setTimeout(() => {
+        process.stdin.emit('keypress', null, { name: 'q', ctrl: true, meta: false });
+      }, 2000);
     }
   }
 }
