@@ -1,6 +1,11 @@
 //@ts-ignore
 import cfonts from 'cfonts';
 import chalk from 'chalk';
+//@ts-ignore
+import notifier from 'node-notifier';
+//@ts-ignore
+import sound from 'sound-play';
+import { exec } from "child_process";
 
 const clear = console.clear;
 const log = console.log;
@@ -15,7 +20,7 @@ class Timer {
   breakTimerCount: number;
 
   constructor(
-    focusTimerCount: number = 1500,
+    focusTimerCount: number = 3,
     breakTimerCount: number = 300
   ){
     this.focusTimerCount = focusTimerCount;
@@ -77,11 +82,21 @@ class Timer {
     if(type === 'focus') log(spacerStr((cols / 2) - todo.length)+chalk.green(todo));
 
     this.timerCount = time - 1;
-    if(this.timerCount > 0 &&
+
+    if(this.timerCount >= 0 &&
       this.isTimerStarted &&
       (!this.isTimerStop || !this.isTimerPaused)
     ) {
       this.timeout = setTimeout(() => this.timerDisplay(this.timerCount, todo, type), 1000);
+    }
+
+    if(this.timerCount < 0) {
+      notifier.notify({
+        title: type === 'focus' ? 'Focus is done!' : 'Break is done!',
+        message: type === 'focus' ? 'Take a break now.' : 'Time to work!'
+      });
+      exec("mpv --audio-display=no ~/Twitch/nodejs/todoro/src/timer-alarm.wav");
+
     }
   }
 }
