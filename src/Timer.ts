@@ -64,7 +64,7 @@ class Timer {
     const addSpacerStr: any = (n: number) => !+n || n <= 0 ? '' : Array.apply(null, Array(Math.ceil(n))).map(i => " ").join('');
 
     clear();
-    if(cols < 50 || rows < 50) {
+    if(cols < 50 || rows < 15) {
       log("\n"+addSpacerStr((cols / 2) - timeStr.toString().length)+timeStr.toString()+"\n");
     } else {
       cfonts.say(timeStr.toString(), {
