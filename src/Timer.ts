@@ -61,10 +61,10 @@ class Timer {
         s = Math.floor(time % 60).toString().padStart(2,'0');
       
     const timeStr = m + ':' + s;
-    const addSpacerStr: any = (n: number) => !+n || n <= 0 ? '' : Array.apply(null, Array(n)).map(i => " ").join('');
+    const addSpacerStr: any = (n: number) => !+n || n <= 0 ? '' : Array.apply(null, Array(Math.ceil(n))).map(i => " ").join('');
 
     clear();
-    if(cols < 150 || rows < 150) {
+    if(cols < 50 || rows < 50) {
       log("\n"+addSpacerStr((cols / 2) - timeStr.toString().length)+timeStr.toString()+"\n");
     } else {
       cfonts.say(timeStr.toString(), {
