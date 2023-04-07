@@ -29,7 +29,7 @@ process.stdin.on('keypress', (char, key) => {
   if (key.ctrl && key.name === 'c') process.exit();
   if(key.shift && key.name === 'h' && screen.getCurrentScreen() === 'MAIN_SCREEN') screen.toggleShowBindings();
     
-  if(key.ctrl && ['MAIN_SCREEN', 'SUBTODO'].includes(screen.getCurrentScreen()) || (key.name === 'tab' && !key.ctrl)) {
+  if(hkey.isTriggered(key, screen)) {
     const keyName = key.name;
     hkey.isExit(keyName);
     hkey.isGotoSubTodo(keyName, menu, todos, screen);
@@ -44,7 +44,7 @@ process.stdin.on('keypress', (char, key) => {
     if(hkey.isStartBreakTimer(keyName, screen, timer)) return;
   }
 
-  if(screen.getMenuWithBindings().includes(screen.getCurrentScreen()) && !screen.getIsUserInputMode() && todos.getTodoLen()) {
+  if(todoListMovements.isTriggered(screen, todos)) {
     const currentMenuSelection: number = menu.getCurrentMenu();
     const currScreen = screen.getCurrentScreen();
     todoListMovements.isSubTodoDown(key, currScreen, currentMenuSelection, todosMenu, todos, menu);
