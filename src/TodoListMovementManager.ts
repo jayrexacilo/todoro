@@ -1,5 +1,6 @@
 import { Todo } from './Todo.js';
 import Menu from './Menu.js';
+import Screen from './Screen.js';
 
 class TodoListMovementsManager {
   isSubTodoDown(key: any, currScreen: string, currentMenuSelection: number, todosMenu: string[], todos: Todo, menu: Menu) {
@@ -49,6 +50,9 @@ class TodoListMovementsManager {
         }
       }
     }
+  }
+  isTriggered(screen: Screen, todos: Todo) {
+    return screen.getMenuWithBindings().includes(screen.getCurrentScreen()) && !screen.getIsUserInputMode() && todos.getTodoLen();
   }
 }
 

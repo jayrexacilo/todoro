@@ -81,6 +81,9 @@ class HotKeyManager {
       screen.showMainScreen(todos.getTodos(), menu.getCurrentMenu(), menu.getCurrentSubMenu());
     }
   }
+  isTriggered(key: any, screen: Screen) {
+    return key.ctrl && ['MAIN_SCREEN', 'SUBTODO'].includes(screen.getCurrentScreen()) || (key.name === 'tab' && !key.ctrl);
+  }
 }
 
 export default HotKeyManager;
