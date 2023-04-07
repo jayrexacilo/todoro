@@ -11,8 +11,6 @@ import ScreenStateTrigger from './ScreenStateTrigger.js';
 
 cliCursor.hide();
 
-const clear = console.clear;
-
 readlineModule.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
 
