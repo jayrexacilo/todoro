@@ -5,10 +5,10 @@ import { Todo } from './Todo.js';
 import Menu from './Menu.js';
 import Screen from './Screen.js';
 import Timer from './Timer.js';
+import HotKeyManager from './HotKeyManager.js';
 
 cliCursor.hide();
 
-const log = console.log;
 const clear = console.clear;
 
 readlineModule.emitKeypressEvents(process.stdin);
@@ -19,6 +19,7 @@ const screen = new Screen('MAIN_SCREEN');
 const todos = new Todo([]);
 const menu = new Menu(0);
 const timer = new Timer();
+const hkey = new HotKeyManager();
 
 screen.showMainScreen(todos.getTodos(), menu.getCurrentMenu(), menu.getCurrentSubMenu());
 
@@ -27,62 +28,18 @@ process.stdin.on('keypress', (char, key) => {
   if(key.shift && key.name === 'h' && screen.getCurrentScreen() === 'MAIN_SCREEN') screen.toggleShowBindings();
     
   if(key.ctrl && ['MAIN_SCREEN', 'SUBTODO'].includes(screen.getCurrentScreen()) || (key.name === 'tab' && !key.ctrl)) {
-    const kName = key.name;
-
-    if(kName === 'x') process.exit();
-    if(kName === 'tab' && todos.getTodoLen() && todos.getTodoByIdx(menu.getCurrentMenu()).subTodo?.length) {
-      menu.setCurrentSubMenu(0);
-      if(screen.getCurrentScreen() === 'SUBTODO') {
-        screen.setCurrentScreen('MAIN_SCREEN');
-        menu.menuType = 'mainmenu';
-      } else {
-        screen.setCurrentScreen('SUBTODO');
-        menu.menuType = 'submenu';
-      }
-    }
-    if(kName === 's' && todos.getTodoLen() && !todos.getTodoByIdx(menu.getCurrentMenu()).isDone) {
-      screen.setCurrentScreen('START_FOCUS');
-      timer.startFocusTimer();
-      let currTodo: any = todos.getTodoByIdx(menu.getCurrentMenu());
-      currTodo = menu.menuType === 'submenu' ? currTodo.subTodo[menu.currentSubMenu].todo : currTodo.todo;
-      timer.timerDisplay(timer.focusTimerCount, currTodo, 'focus');
-      return;
-    }
-    if(kName === 'z') {
-      screen.setCurrentScreen('START_BREAK');
-      timer.startBreakTimer();
-      let currTodo: any = todos.getTodoByIdx(menu.getCurrentMenu());
-      currTodo = '';
-      timer.timerDisplay(timer.breakTimerCount, currTodo, 'break');
-      return;
-    }
-    if(kName === 'o') {
-      screen.setCurrentScreen('SET_FOCUS_TIMER');
-    }
-    if(kName === 'p') {
-      screen.setCurrentScreen('SET_BREAK_TIMER');
-    }
-    if(kName === '`' && key.ctrl && key.sequence === '\x00' && todos.getTodoLen()) {
-      if(screen.getCurrentScreen() === 'MAIN_SCREEN') todos.toggleTodoStatus(menu.getCurrentMenu());
-      if(screen.getCurrentScreen() === 'SUBTODO') todos.toggleSubTodoStatus(menu.getCurrentMenu(), menu.getCurrentSubMenu());
-      screen.showMainScreen(todos.getTodos(), menu.getCurrentMenu(), menu.getCurrentSubMenu());
-    }
-    if(kName === 'a') {
-      screen.setCurrentScreen('ADD_TODO');
-      screen.setIsUserInputMode(true);
-    }
-    if(kName === 'f') {
-      screen.setCurrentScreen('ADD_SUBTODO');
-      screen.setIsUserInputMode(true);
-    }
-    if(kName === 'e' && todos.getTodoLen()) {
-      screen.setCurrentScreen(menu.menuType === 'mainmenu' ? 'EDIT_TODO' : 'EDIT_SUBTODO');
-      screen.setIsUserInputMode(true);
-    }
-    if(kName === 'd' && todos.getTodoLen()) {
-      screen.setCurrentScreen('DELETE_TODO');
-      screen.onDeleteTodo(todos.getTodoByIdx(menu.getCurrentMenu()).todo);
-    }
+    const keyName = key.name;
+    hkey.isExit(keyName);
+    hkey.isGotoSubTodo(keyName, menu, todos, screen);
+    hkey.isSetFocusTimer(keyName, screen);
+    hkey.isSetBreakTimer(keyName, screen);
+    hkey.isToggleTodoStatus(keyName, key, todos, menu, screen);
+    hkey.isAddTodo(keyName, screen);
+    hkey.isAddSubTodo(keyName, screen);
+    hkey.isEditTodo(keyName, screen, todos, menu);
+    hkey.isDeleteTodo(keyName, screen, todos, menu);
+    if(hkey.isStartFocusTimer(keyName, todos, menu, screen, timer)) return;
+    if(hkey.isStartBreakTimer(keyName, screen, timer)) return;
   }
 
   if(screen.getMenuWithBindings().includes(screen.getCurrentScreen()) && !screen.getIsUserInputMode() && todos.getTodoLen()) {
