@@ -6,6 +6,7 @@ import Menu from './Menu.js';
 import Screen from './Screen.js';
 import Timer from './Timer.js';
 import HotKeyManager from './HotKeyManager.js';
+import TodoListMovementsManager from './TodoListMovementManager.js';
 
 cliCursor.hide();
 
@@ -20,6 +21,7 @@ const todos = new Todo([]);
 const menu = new Menu(0);
 const timer = new Timer();
 const hkey = new HotKeyManager();
+const todoListMovements = new TodoListMovementsManager();
 
 screen.showMainScreen(todos.getTodos(), menu.getCurrentMenu(), menu.getCurrentSubMenu());
 
@@ -45,46 +47,9 @@ process.stdin.on('keypress', (char, key) => {
   if(screen.getMenuWithBindings().includes(screen.getCurrentScreen()) && !screen.getIsUserInputMode() && todos.getTodoLen()) {
     const currentMenuSelection: number = menu.getCurrentMenu();
     const currScreen = screen.getCurrentScreen();
-    if(key && key.name == 'j' && currScreen !== 'SUBTODO') {
-      if(currentMenuSelection === (todos.getTodoLen() - 1) && todosMenu.includes(currScreen)) {
-        menu.setCurrentMenu(0);
-      } else {
-        menu.setCurrentMenu(menu.getCurrentMenu() + 1);
-      }
-    }
-    if(key && key.name == 'k' && currScreen !== 'SUBTODO') {
-      menu.setCurrentSubMenu(0);
-      if(currentMenuSelection === 0) {
-        switch(currScreen) {
-          case 'EDIT_TODO':
-          case 'DELETE_TODO':
-          case 'MAIN_SCREEN':
-            menu.setCurrentMenu(todos.getTodoLen() - 1);
-            break;
-        }
-      } else {
-        menu.setCurrentMenu(menu.getCurrentMenu() - 1);
-      }
-    }
-    if(currScreen === 'SUBTODO') {
-      const currentSubMenuSelection: number = menu.getCurrentSubMenu();
-      const currentTodo = todos.getTodoByIdx(menu.getCurrentMenu());
-      const currentSubTodo = currentTodo.subTodo;
-      if(key && key.name == 'j') {
-        if(currentSubMenuSelection === (currentSubTodo.length - 1) && todosMenu.includes(currScreen)) {
-          menu.setCurrentSubMenu(0);
-        } else {
-          menu.setCurrentSubMenu(menu.getCurrentSubMenu() + 1);
-        }
-      }
-      if(key && key.name == 'k') {
-        if(currentSubMenuSelection === 0) {
-          menu.setCurrentSubMenu(currentSubTodo.length - 1);
-        } else {
-          menu.setCurrentSubMenu(menu.getCurrentSubMenu() - 1);
-        }
-      }
-    }
+    todoListMovements.isSubTodoDown(key, currScreen, currentMenuSelection, todosMenu, todos, menu);
+    todoListMovements.isSubTodoUp(key, currScreen, currentMenuSelection, todos, menu)
+    todoListMovements.isTodoUpDown(key, currScreen, todosMenu, todos, menu);
   }
 
   if(screen.getCurrentScreen() === 'SET_FOCUS_TIMER') {
