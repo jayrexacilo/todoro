@@ -3,56 +3,68 @@ import Menu from './Menu.js';
 import Screen from './Screen.js';
 
 class TodoListMovementsManager {
-  isSubTodoDown(key: any, currScreen: string, currentMenuSelection: number, todosMenu: string[], todos: Todo, menu: Menu) {
+  private todos: Todo;
+  private menu: Menu;
+  private screen: Screen;
+  private todosMenu: string[];
+
+  constructor(todos: Todo, menu: Menu, screen: Screen, todosMenu: string[]) {
+    this.todos = todos;
+    this.menu = menu;
+    this.screen = screen;
+    this.todosMenu = todosMenu;
+  }
+
+  isSubTodoDown(key: any, currScreen: string, currentMenuSelection: number) {
     if(key && key.name == 'j' && currScreen !== 'SUBTODO') {
-      if(currentMenuSelection === (todos.getTodoLen() - 1) && todosMenu.includes(currScreen)) {
-        menu.setCurrentMenu(0);
+      if(currentMenuSelection === (this.todos.getTodoLen() - 1) && this.todosMenu.includes(currScreen)) {
+        this.menu.setCurrentMenu(0);
       } else {
-        menu.setCurrentMenu(menu.getCurrentMenu() + 1);
+        this.menu.setCurrentMenu(this.menu.getCurrentMenu() + 1);
       }
     }
   }
 
-  isSubTodoUp(key: any, currScreen: string, currentMenuSelection: number, todos: Todo, menu: Menu) {
+  isSubTodoUp(key: any, currScreen: string, currentMenuSelection: number) {
     if(key && key.name == 'k' && currScreen !== 'SUBTODO') {
-      menu.setCurrentSubMenu(0);
+      this.menu.setCurrentSubMenu(0);
       if(currentMenuSelection === 0) {
         switch(currScreen) {
           case 'EDIT_TODO':
           case 'DELETE_TODO':
           case 'MAIN_SCREEN':
-            menu.setCurrentMenu(todos.getTodoLen() - 1);
+            this.menu.setCurrentMenu(this.todos.getTodoLen() - 1);
             break;
         }
       } else {
-        menu.setCurrentMenu(menu.getCurrentMenu() - 1);
+        this.menu.setCurrentMenu(this.menu.getCurrentMenu() - 1);
       }
     }
   }
 
-  isTodoUpDown(key: any, currScreen: string, todosMenu: string[], todos: Todo, menu: Menu) {
+  isTodoUpDown(key: any, currScreen: string) {
     if(currScreen === 'SUBTODO') {
-      const currentSubMenuSelection: number = menu.getCurrentSubMenu();
-      const currentTodo = todos.getTodoByIdx(menu.getCurrentMenu());
+      const currentSubMenuSelection: number = this.menu.getCurrentSubMenu();
+      const currentTodo = this.todos.getTodoByIdx(this.menu.getCurrentMenu());
       const currentSubTodo = currentTodo.subTodo;
       if(key && key.name == 'j') {
-        if(currentSubMenuSelection === (currentSubTodo.length - 1) && todosMenu.includes(currScreen)) {
-          menu.setCurrentSubMenu(0);
+        if(currentSubMenuSelection === (currentSubTodo.length - 1) && this.todosMenu.includes(currScreen)) {
+          this.menu.setCurrentSubMenu(0);
         } else {
-          menu.setCurrentSubMenu(menu.getCurrentSubMenu() + 1);
+          this.menu.setCurrentSubMenu(this.menu.getCurrentSubMenu() + 1);
         }
       }
       if(key && key.name == 'k') {
         if(currentSubMenuSelection === 0) {
-          menu.setCurrentSubMenu(currentSubTodo.length - 1);
+          this.menu.setCurrentSubMenu(currentSubTodo.length - 1);
         } else {
-          menu.setCurrentSubMenu(menu.getCurrentSubMenu() - 1);
+          this.menu.setCurrentSubMenu(this.menu.getCurrentSubMenu() - 1);
         }
       }
     }
   }
-  isTriggered(screen: Screen, todos: Todo) {
-    return screen.getMenuWithBindings().includes(screen.getCurrentScreen()) && !screen.getIsUserInputMode() && todos.getTodoLen();
+  isTriggered() {
+    return this.screen.getMenuWithBindings().includes(this.screen.getCurrentScreen()) && !this.screen.getIsUserInputMode() && this.todos.getTodoLen();
   }
 }
 

@@ -20,7 +20,7 @@ const todos = new Todo([]);
 const menu = new Menu(0);
 const timer = new Timer();
 const hkey = new HotKeyManager(menu, screen, timer, todos);
-const todoListMovements = new TodoListMovementsManager();
+const todoListMovements = new TodoListMovementsManager(todos, menu, screen, todosMenu);
 const onScreenStateChange = new ScreenStateTrigger();
 
 screen.showMainScreen(todos.getTodos(), menu.getCurrentMenu(), menu.getCurrentSubMenu());
@@ -44,12 +44,12 @@ process.stdin.on('keypress', (char, key) => {
     if(hkey.isStartBreakTimer(keyName)) return;
   }
 
-  if(todoListMovements.isTriggered(screen, todos)) {
+  if(todoListMovements.isTriggered()) {
     const currentMenuSelection: number = menu.getCurrentMenu();
     const currScreen = screen.getCurrentScreen();
-    todoListMovements.isSubTodoDown(key, currScreen, currentMenuSelection, todosMenu, todos, menu);
-    todoListMovements.isSubTodoUp(key, currScreen, currentMenuSelection, todos, menu)
-    todoListMovements.isTodoUpDown(key, currScreen, todosMenu, todos, menu);
+    todoListMovements.isSubTodoDown(key, currScreen, currentMenuSelection);
+    todoListMovements.isSubTodoUp(key, currScreen, currentMenuSelection)
+    todoListMovements.isTodoUpDown(key, currScreen);
   }
 
   if(onScreenStateChange.isSetFocusTimerState(key, todos, timer, menu, screen)) return;
