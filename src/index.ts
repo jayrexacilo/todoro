@@ -21,7 +21,7 @@ const menu = new Menu(0);
 const timer = new Timer();
 const hkey = new HotKeyManager(menu, screen, timer, todos);
 const todoListMovements = new TodoListMovementsManager(todos, menu, screen, todosMenu);
-const onScreenStateChange = new ScreenStateTrigger();
+const onScreenStateChange = new ScreenStateTrigger(todos, menu, timer, screen);
 
 screen.showMainScreen(todos.getTodos(), menu.getCurrentMenu(), menu.getCurrentSubMenu());
 
@@ -52,12 +52,12 @@ process.stdin.on('keypress', (char, key) => {
     todoListMovements.isTodoUpDown(key, currScreen);
   }
 
-  if(onScreenStateChange.isSetFocusTimerState(key, todos, timer, menu, screen)) return;
-  if(onScreenStateChange.isSetBreakTimer(key, todos, timer, menu, screen)) return;
-  if(onScreenStateChange.isStartFocusOrBreak(key, todos, timer, screen, menu)) return;
-  if(onScreenStateChange.isAddTodo(key, todos, screen, menu)) return;
-  if(onScreenStateChange.isAddSubTodo(key, todos, screen, menu)) return;
-  if(onScreenStateChange.isEditTodo(key, todos, screen, menu)) return;
-  if(onScreenStateChange.isDeleteTodo(key, todos, screen, menu)) return;
-  onScreenStateChange.isShowMainOrSubTodoScreen(screen, todos, menu)
+  if(onScreenStateChange.isSetFocusTimerState(key)) return;
+  if(onScreenStateChange.isSetBreakTimer(key)) return;
+  if(onScreenStateChange.isStartFocusOrBreak(key)) return;
+  if(onScreenStateChange.isAddTodo(key)) return;
+  if(onScreenStateChange.isAddSubTodo(key)) return;
+  if(onScreenStateChange.isEditTodo(key)) return;
+  if(onScreenStateChange.isDeleteTodo(key)) return;
+  onScreenStateChange.isShowMainOrSubTodoScreen();
 });
