@@ -19,7 +19,7 @@ const screen = new Screen('MAIN_SCREEN');
 const todos = new Todo([]);
 const menu = new Menu(0);
 const timer = new Timer();
-const hkey = new HotKeyManager();
+const hkey = new HotKeyManager(menu, screen, timer, todos);
 const todoListMovements = new TodoListMovementsManager();
 const onScreenStateChange = new ScreenStateTrigger();
 
@@ -29,19 +29,19 @@ process.stdin.on('keypress', (char, key) => {
   if (key.ctrl && key.name === 'c') process.exit();
   if(key.shift && key.name === 'h' && screen.getCurrentScreen() === 'MAIN_SCREEN') screen.toggleShowBindings();
     
-  if(hkey.isTriggered(key, screen)) {
+  if(hkey.isTriggered(key)) {
     const keyName = key.name;
     hkey.isExit(keyName);
-    hkey.isGotoSubTodo(keyName, menu, todos, screen);
-    hkey.isSetFocusTimer(keyName, screen);
-    hkey.isSetBreakTimer(keyName, screen);
-    hkey.isToggleTodoStatus(keyName, key, todos, menu, screen);
-    hkey.isAddTodo(keyName, screen);
-    hkey.isAddSubTodo(keyName, screen);
-    hkey.isEditTodo(keyName, screen, todos, menu);
-    hkey.isDeleteTodo(keyName, screen, todos, menu);
-    if(hkey.isStartFocusTimer(keyName, todos, menu, screen, timer)) return;
-    if(hkey.isStartBreakTimer(keyName, screen, timer)) return;
+    hkey.isGotoSubTodo(keyName);
+    hkey.isSetFocusTimer(keyName);
+    hkey.isSetBreakTimer(keyName);
+    hkey.isToggleTodoStatus(keyName, key);
+    hkey.isAddTodo(keyName);
+    hkey.isAddSubTodo(keyName);
+    hkey.isEditTodo(keyName);
+    hkey.isDeleteTodo(keyName);
+    if(hkey.isStartFocusTimer(keyName)) return;
+    if(hkey.isStartBreakTimer(keyName)) return;
   }
 
   if(todoListMovements.isTriggered(screen, todos)) {
