@@ -116,7 +116,9 @@ class ScreenStateTrigger {
           this.screen.setIsUserInputMode(false);
           this.screen.clearUserInputValue();
           this.menu.setCurrentMenu(this.todos.getTodoLen() - 1);
-          await this.screen.showMainScreen(this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
+          setTimeout(() => {
+            this.screen.showMainScreen(this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
+          }, 50);
           return true;
         }
         this.screen.onAddTodo(key.sequence, key.name);
