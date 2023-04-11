@@ -75,7 +75,9 @@ class Todo {
     const subTodos = getTodos.filter((item: any) => item.parentTodoId === currTodo.id);
     const isDone = !currTodo.isDone;
     if(subTodos?.length) {
-      //currTodo.subTodo = currTodo.subTodo.map(item => ({...item,isDone: !currTodo.isDone}));
+      subTodos.map((item: any) => {
+        this.server.updateTodo(item.id, isDone);
+      });
     }
     this.server.updateTodo(currTodo.id, isDone);
   }
