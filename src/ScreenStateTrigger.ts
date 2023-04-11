@@ -4,6 +4,13 @@ import Screen from './Screen.js';
 import Timer from './Timer.js';
 import fs from 'fs';
 
+type todoTypeS = {
+  id: number,
+  todo: string,
+  isDone: boolean,
+  parentTodoId: number
+}
+
 const clear = console.clear;
 
 class ScreenStateTrigger {
@@ -19,14 +26,14 @@ class ScreenStateTrigger {
     this.screen = screen;
   }
 
-  isSetFocusTimerState(key: any) {
+  async isSetFocusTimerState(key: any) {
     if(this.screen.getCurrentScreen() === 'SET_FOCUS_TIMER') {
       if(key.name === 'return') {
         this.timer.focusTimerCount = +this.screen.getInputValue() * 60;
         this.screen.setIsUserInputMode(false);
         this.screen.clearUserInputValue();
         this.screen.setCurrentScreen('MAIN_SCREEN');
-        this.screen.showMainScreen(this.todos.getTodos(), this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
+        await this.screen.showMainScreen(this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
         return true;
       }
       this.screen.onSetFocusTime(key.sequence, key.name, (this.timer.focusTimerCount / 60).toString());
@@ -34,14 +41,14 @@ class ScreenStateTrigger {
     }
     return false
   }
-  isSetBreakTimer(key: any) {
+  async isSetBreakTimer(key: any) {
     if(this.screen.getCurrentScreen() === 'SET_BREAK_TIMER') {
       if(key.name === 'return') {
         this.timer.breakTimerCount = +this.screen.getInputValue() * 60;
         this.screen.setIsUserInputMode(false);
         this.screen.clearUserInputValue();
         this.screen.setCurrentScreen('MAIN_SCREEN');
-        this.screen.showMainScreen(this.todos.getTodos(), this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
+        await this.screen.showMainScreen(this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
         return true;
       }
       this.screen.onSetBreakTime(key.sequence, key.name, (this.timer.breakTimerCount / 60).toString());
@@ -50,7 +57,7 @@ class ScreenStateTrigger {
 
     return false;
   }
-  isStartFocusOrBreak(key: any) {
+  async isStartFocusOrBreak(key: any) {
     if(['START_FOCUS', 'START_BREAK'].includes(this.screen.getCurrentScreen())) {
       const isToggleBreakTimer = key.name === 'z' && this.screen.getCurrentScreen() === 'START_BREAK';
       const isToggleFocusTimer = key.name === 's' && this.screen.getCurrentScreen() === 'START_FOCUS';
@@ -93,7 +100,7 @@ class ScreenStateTrigger {
           setTimeout(() => {
             clear();
             this.screen.setCurrentScreen(this.menu.menuType === 'submenu' ? 'SUBTODO' : 'MAIN_MENU');
-            this.screen.showMainScreen(this.todos.getTodos(), this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
+            this.screen.showMainScreen(this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
           }, 700);
         }
       }
@@ -101,7 +108,7 @@ class ScreenStateTrigger {
     }
     return false;
   }
-  isAddTodo(key: any) {
+  async isAddTodo(key: any) {
     if(this.screen.getCurrentScreen() === 'ADD_TODO') {
       if(this.screen.getIsUserInputMode()) {
         if(key.name === 'return') {
@@ -109,7 +116,7 @@ class ScreenStateTrigger {
           this.screen.setIsUserInputMode(false);
           this.screen.clearUserInputValue();
           this.menu.setCurrentMenu(this.todos.getTodoLen() - 1);
-          this.screen.showMainScreen(this.todos.getTodos(), this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
+          await this.screen.showMainScreen(this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
           return true;
         }
         this.screen.onAddTodo(key.sequence, key.name);
@@ -118,27 +125,28 @@ class ScreenStateTrigger {
     }
     return false;
   }
-  isAddSubTodo(key: any) {
+  async isAddSubTodo(key: any) {
     if(this.screen.getCurrentScreen() === 'ADD_SUBTODO') {
       if(this.screen.getIsUserInputMode()) {
+        const getTodo = await this.todos.getTodoByIdx(this.menu.getCurrentMenu());
         if(key.name === 'return') {
-          this.todos.getTodoByIdx(this.menu.getCurrentMenu()).isDone = false;
-          this.todos.addSubTodo(this.screen.getInputValue(), this.menu.getCurrentMenu());
+          getTodo.isDone = false;
+          this.todos.addSubTodo(this.screen.getInputValue(), getTodo.id);
           this.screen.clearUserInputValue();
-          this.screen.showMainScreen(this.todos.getTodos(), this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
           this.screen.setIsUserInputMode(false);
+          setTimeout(() => this.screen.showMainScreen(this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu()), 300);
           return true;
         }
-        this.screen.onAddSubTodo(key.sequence, key.name, this.todos.getTodoByIdx(this.menu.getCurrentMenu()).todo);
+        this.screen.onAddSubTodo(key.sequence, key.name, getTodo.todo);
         return true;
       }
     }
     return false
   }
-  isEditTodo(key: any) {
+  async isEditTodo(key: any) {
     if(['EDIT_TODO', 'EDIT_SUBTODO'].includes(this.screen.getCurrentScreen())) {
       if(key && key.name === 'escape') {
-        this.screen.showMainScreen(this.todos.getTodos(), this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
+        await this.screen.showMainScreen(this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
         return true;
       }
       if(key && key.name === 'return') {
@@ -152,7 +160,7 @@ class ScreenStateTrigger {
             this.screen.setCurrentScreen('SUBTODO');
             break;
         }
-        this.screen.showMainScreen(this.todos.getTodos(), this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
+        await this.screen.showMainScreen(this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
         this.screen.setIsUserInputMode(false);
         this.screen.clearUserInputValue();
         return true;
@@ -166,22 +174,24 @@ class ScreenStateTrigger {
     }
     return false;
   }
-  isDeleteTodo(key: any) {
+  async isDeleteTodo(key: any) {
     if(this.screen.getCurrentScreen() === 'DELETE_TODO') {
       if(key.sequence === 'y') {
-        this.todos.deleteTodo(this.menu.getCurrentMenu());
-        this.menu.setCurrentMenu(this.menu.getCurrentMenu() > 1 ? this.menu.getCurrentMenu() - 1 : 0);
+        await this.todos.deleteTodo(this.menu.getCurrentMenu());
+        setTimeout(() => {
+          this.menu.setCurrentMenu(this.menu.getCurrentMenu() > 1 ? this.menu.getCurrentMenu() - 1 : 0);
+        }, 300);
       }
       if(['n', 'y'].includes(key.sequence)) {
-        this.screen.showMainScreen(this.todos.getTodos(), this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
+        await this.screen.showMainScreen(this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
       }
       return true;
     }
     return false;
   }
-  isShowMainOrSubTodoScreen() {
+  async isShowMainOrSubTodoScreen() {
     if(['MAIN_SCREEN', 'SUBTODO'].includes(this.screen.getCurrentScreen())) {
-      this.screen.showMainScreen(this.todos.getTodos(), this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
+      await this.screen.showMainScreen(this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
     }
   }
 }

@@ -7,6 +7,7 @@ import notifier from 'node-notifier';
 import sound from 'sound-play';
 import { exec } from "child_process";
 import process, { cwd } from "process";
+import fs from 'fs';
 
 const clear = console.clear;
 const log = console.log;
@@ -64,6 +65,14 @@ class Timer {
     const addSpacerStr: any = (n: number) => !+n || n <= 0 ? '' : Array.apply(null, Array(Math.ceil(n))).map(i => " ").join('');
 
     clear();
+
+    try {
+      const timerTypeStr = type === 'focus' ? 'FOCUS! ' : 'BREAK! ';
+      fs.writeFileSync('./timer.txt', timerTypeStr+'⏲️ '+timeStr.toString());
+    } catch(err) {
+      //console.log('error on write file => ', err);
+    }
+
     if(cols < 50 || rows < 15) {
       log("\n"+addSpacerStr((cols / 2) - timeStr.toString().length)+timeStr.toString()+"\n");
     } else {
@@ -99,6 +108,11 @@ class Timer {
     }
 
     if(this.timerCount < 0) {
+      try {
+        fs.writeFileSync('./timer.txt', '');
+      } catch(err) {
+        //console.log('error on write file => ', err);
+      }
       notifier.notify({
         title: type === 'focus' ? 'Focus is done!' : 'Break is done!',
         message: type === 'focus' ? 'Take a break now.' : 'Time to work!'

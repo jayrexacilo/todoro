@@ -2,18 +2,21 @@ import { Todo } from './Todo.js';
 import Menu from './Menu.js';
 import Screen from './Screen.js';
 import Timer from './Timer.js';
+import Server from './Server.js';
 
 class HotKeyManager {
   private menu: Menu;
   private screen: Screen;
   private timer: Timer;
   private todos: Todo;
+  private server;
 
   constructor(menu: Menu, screen: Screen, timer: Timer, todos: Todo) {
     this.menu = menu;
     this.screen = screen;
     this.timer = timer;
     this.todos = todos;
+    this.server = new Server();
   }
 
   isExit(keyName: string) {
@@ -21,7 +24,7 @@ class HotKeyManager {
   }
 
   isGotoSubTodo(keyName: string) {
-    if(keyName === 'tab' && this.todos.getTodoLen() && this.todos.getTodoByIdx(this.menu.getCurrentMenu()).subTodo?.length) {
+    if(keyName === 'tab' && this.todos.getTodoLen()) {
       this.menu.setCurrentSubMenu(0);
       if(this.screen.getCurrentScreen() === 'SUBTODO') {
         this.screen.setCurrentScreen('MAIN_SCREEN');
@@ -33,7 +36,7 @@ class HotKeyManager {
     }
   }
   isStartFocusTimer(keyName: string) {
-    if(keyName === 's' && this.todos.getTodoLen() && !this.todos.getTodoByIdx(this.menu.getCurrentMenu()).isDone) {
+    if(keyName === 's' && this.todos.getTodoLen()) {
       this.screen.setCurrentScreen('START_FOCUS');
       this.timer.startFocusTimer();
       let currTodo: any = this.todos.getTodoByIdx(this.menu.getCurrentMenu());
@@ -80,17 +83,27 @@ class HotKeyManager {
       this.screen.setIsUserInputMode(true);
     }
   }
-  isDeleteTodo(keyName: string) {
-    if(keyName === 'd' && this.todos.getTodoLen()) {
+  async isDeleteTodo(keyName: string) {
+    const getTodos = await this.server.getTodos();
+    const todos = getTodos.filter((item: any) => !item.parentTodoId);
+    const todosLen = todos?.length
+    if(keyName === 'd' && todosLen) {
+      const getTodo = await this.todos.getTodoByIdx(this.menu.getCurrentMenu());
       this.screen.setCurrentScreen('DELETE_TODO');
-      this.screen.onDeleteTodo(this.todos.getTodoByIdx(this.menu.getCurrentMenu()).todo);
+      this.screen.onDeleteTodo(getTodo.todo);
     }
   }
-  isToggleTodoStatus(keyName: string, key: any) {
-    if(keyName === '`' && key.ctrl && key.sequence === '\x00' && this.todos.getTodoLen()) {
+  async isToggleTodoStatus(keyName: string, key: any) {
+    const getTodos = await this.server.getTodos();
+    const todos = getTodos.filter((item: any) => !item.parentTodoId);
+    const todosLen = todos?.length
+
+    if(keyName === '`' && key.ctrl && key.sequence === '\x00' && todosLen) {
       if(this.screen.getCurrentScreen() === 'MAIN_SCREEN') this.todos.toggleTodoStatus(this.menu.getCurrentMenu());
       if(this.screen.getCurrentScreen() === 'SUBTODO') this.todos.toggleSubTodoStatus(this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
-      this.screen.showMainScreen(this.todos.getTodos(), this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
+      setTimeout(() => {
+        this.screen.showMainScreen(this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
+      }, 300);
     }
   }
   isTriggered(key: any) {

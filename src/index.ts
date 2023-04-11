@@ -1,5 +1,6 @@
 import readlineModule from 'readline';
 import cliCursor from 'cli-cursor';
+import fs from 'fs';
 
 import { Todo } from './Todo.js';
 import Menu from './Menu.js';
@@ -23,10 +24,17 @@ const hkey = new HotKeyManager(menu, screen, timer, todos);
 const todoListMovements = new TodoListMovementsManager(todos, menu, screen, todosMenu);
 const onScreenStateChange = new ScreenStateTrigger(todos, menu, timer, screen);
 
-screen.showMainScreen(todos.getTodos(), menu.getCurrentMenu(), menu.getCurrentSubMenu());
+screen.showMainScreen(menu.getCurrentMenu(), menu.getCurrentSubMenu()).then(res => {
+});
 
-process.stdin.on('keypress', (char, key) => {
-  if (key.ctrl && key.name === 'c') process.exit();
+process.stdin.on('keypress', async (char, key) => {
+  if (key.ctrl && key.name === 'c') {
+    try {
+      fs.writeFileSync('./timer.txt', '');
+    } catch(err) {
+    }
+    process.exit();
+  }
   if(key.shift && key.name === 'h' && screen.getCurrentScreen() === 'MAIN_SCREEN') screen.toggleShowBindings();
     
   if(hkey.isTriggered(key)) {
@@ -44,20 +52,18 @@ process.stdin.on('keypress', (char, key) => {
     if(hkey.isStartBreakTimer(keyName)) return;
   }
 
-  if(todoListMovements.isTriggered()) {
+  if(await todoListMovements.isTriggered()) {
     const currentMenuSelection: number = menu.getCurrentMenu();
     const currScreen = screen.getCurrentScreen();
-    todoListMovements.isSubTodoDown(key, currScreen, currentMenuSelection);
-    todoListMovements.isSubTodoUp(key, currScreen, currentMenuSelection)
-    todoListMovements.isTodoUpDown(key, currScreen);
+    await todoListMovements.isMenuMoving(key, currScreen, currentMenuSelection);
   }
 
-  if(onScreenStateChange.isSetFocusTimerState(key)) return;
-  if(onScreenStateChange.isSetBreakTimer(key)) return;
-  if(onScreenStateChange.isStartFocusOrBreak(key)) return;
-  if(onScreenStateChange.isAddTodo(key)) return;
-  if(onScreenStateChange.isAddSubTodo(key)) return;
-  if(onScreenStateChange.isEditTodo(key)) return;
-  if(onScreenStateChange.isDeleteTodo(key)) return;
-  onScreenStateChange.isShowMainOrSubTodoScreen();
+  if(await onScreenStateChange.isSetFocusTimerState(key)) return;
+  if(await onScreenStateChange.isSetBreakTimer(key)) return;
+  if(await onScreenStateChange.isStartFocusOrBreak(key)) return;
+  if(await onScreenStateChange.isAddTodo(key)) return;
+  if(await onScreenStateChange.isAddSubTodo(key)) return;
+  if(await onScreenStateChange.isEditTodo(key)) return;
+  if(await onScreenStateChange.isDeleteTodo(key)) return;
+  await onScreenStateChange.isShowMainOrSubTodoScreen();
 });

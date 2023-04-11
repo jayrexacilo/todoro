@@ -1,4 +1,5 @@
-import {todoType, subTodoType} from './Todo.js';
+import Server from './Server.js';
+import {todoTypeS, todoType, subTodoType} from './Todo.js';
 import chalk from 'chalk';
 
 const log = console.log;
@@ -12,11 +13,13 @@ class Screen {
   private currentScreen: string
   private isUserInputMode: boolean = false;
   private isShowHelp: boolean = false;
+  private server;
 
   constructor(
     currentScreen: string
   ) {
     this.currentScreen = currentScreen;
+    this.server = new Server();
   }
 
   setCurrentScreen(screen: string) {
@@ -37,11 +40,22 @@ class Screen {
   toggleShowBindings() {
     this.isShowHelp = !this.isShowHelp;
   }
-  showMainScreen(todos: todoType[], currentMenu: number, currentSubMenu: number) {
+  async showMainScreen(currentMenu: number, currentSubMenu: number) {
+    const _todos: any = await this.server.getTodos();
     if(this.currentScreen !== 'SUBTODO') this.currentScreen = 'MAIN_SCREEN';
     clear();
-    if(todos?.length) {
-      todos.map((item, i) => {
+    if(_todos?.length) {
+      let todos = _todos.filter((item: todoTypeS) => !item.parentTodoId);
+      const subTodos = _todos.filter((item: todoTypeS) => item.parentTodoId);
+      todos = todos.map((item: todoTypeS) => {
+        const getSubTodo = subTodos.filter((sItem: todoTypeS) => sItem.parentTodoId === item.id);
+        return {
+          ...item,
+          subTodo: getSubTodo?.length ? getSubTodo : []
+        }
+      });
+
+      todos.map((item: any, i: number) => {
         const isDone = item.isDone  ? '[x]' : '[ ]';
         let logStr = isDone+' '+item.todo;
         if(currentMenu === i) {

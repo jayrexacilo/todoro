@@ -1,3 +1,6 @@
+import Server from './Server.js';
+import sqlite3 from 'sqlite3';
+
 type subTodoType = {
   todo: string
   isDone: boolean,
@@ -8,13 +11,22 @@ type todoType = {
   subTodo: subTodoType[]
 }
 
+type todoTypeS = {
+  id: number,
+  todo: string,
+  isDone: boolean,
+  parentTodoId: number
+}
+
 class Todo {
   private todos: todoType[];
+  private server;
 
   constructor(
     todos: todoType[]
   ) {
     this.todos = todos;
+    this.server = new Server();
   }
 
   todoFormat(todo: string, isSub: boolean): any {
@@ -27,12 +39,16 @@ class Todo {
   addTodo(todo: string) {
     const todoData: todoType = this.todoFormat(todo, false);
     this.todos.push(todoData);
+    this.server.addTodo(todo);
   }
-  addSubTodo(todo: string, idx: number) {
-    this.todos[idx].subTodo.push(this.todoFormat(todo, true));
+  addSubTodo(todo: string, parentTodoId: number) {
+    this.server.addSubTodo(todo, parentTodoId);
   }
-  deleteTodo(idx: number) {
-    this.todos.splice(idx, 1);
+  async deleteTodo(idx: number) {
+    const getTodos = await this.server.getTodos();
+    const todo = getTodos.filter((item: any) => !item.parentTodoId)[idx];
+    const deleteTodo = await this.server.deleteTodo(todo.id);
+    return deleteTodo;
   }
   updateTodo(todo: string, idx: number) {
     this.todos[idx].todo = todo;
@@ -40,18 +56,28 @@ class Todo {
   updateSubTodo(todo: string, idx: number, subidx: number) {
     this.todos[idx].subTodo[subidx].todo = todo;
   }
-  getTodoByIdx(idx: number) {
-    return this.todos[idx];
+  async getTodoByIdx(idx: number): Promise<todoTypeS> {
+    const todos: todoTypeS[] = await this.server.getTodos();
+    const currTodo: todoTypeS = todos[idx];
+    return new Promise<todoTypeS>((resolve, reject) => {
+      resolve(currTodo);
+    });
+  }
+  async getServerTodos() {
+    return await this.server.getTodos();
   }
   getTodos() {
     return this.todos;
   }
-  toggleTodoStatus(idx: number) {
-    const currTodo = this.todos[idx];
-    if(currTodo.subTodo?.length) {
-      currTodo.subTodo = currTodo.subTodo.map(item => ({...item,isDone: !currTodo.isDone}));
+  async toggleTodoStatus(idx: number) {
+    const getTodos = await this.server.getTodos();
+    const currTodo = getTodos.filter((item: any) => !item.parentTodoId)[idx];
+    const subTodos = getTodos.filter((item: any) => item.parentTodoId === currTodo.id);
+    const isDone = !currTodo.isDone;
+    if(subTodos?.length) {
+      //currTodo.subTodo = currTodo.subTodo.map(item => ({...item,isDone: !currTodo.isDone}));
     }
-    currTodo.isDone = !currTodo.isDone;
+    this.server.updateTodo(currTodo.id, isDone);
   }
   toggleSubTodoStatus(idx: number, subIdx: number) {
     this.todos[idx].isDone = false;
@@ -67,5 +93,6 @@ class Todo {
 export {
   Todo,
   subTodoType,
-  todoType
+  todoType,
+  todoTypeS
 };
