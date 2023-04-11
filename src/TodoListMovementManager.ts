@@ -42,35 +42,36 @@ class TodoListMovementsManager {
     }
   }
 
-  async isSubTodoUpDown(key: any, currScreen: string, currentMenuSelection: number) {
+  async isSubTodoUpDown(key: any, currScreen: string, currentSubMenuSelection: number, todosLen: number) {
     if(currScreen === 'SUBTODO') {
-      const currentSubMenuSelection: number = this.menu.getCurrentSubMenu();
-      const currentTodo: any = this.todos.getTodoByIdx(this.menu.getCurrentMenu());
-      const currentSubTodo = currentTodo.subTodo;
       if(key && key.name == 'j') {
-        if(currentSubMenuSelection === (currentSubTodo.length - 1) && this.todosMenu.includes(currScreen)) {
+        if(currentSubMenuSelection === (todosLen - 1) && this.todosMenu.includes(currScreen)) {
           this.menu.setCurrentSubMenu(0);
         } else {
-          this.menu.setCurrentSubMenu(this.menu.getCurrentSubMenu() + 1);
+          this.menu.setCurrentSubMenu(currentSubMenuSelection + 1);
         }
       }
       if(key && key.name == 'k') {
         if(currentSubMenuSelection === 0) {
-          this.menu.setCurrentSubMenu(currentSubTodo.length - 1);
+          this.menu.setCurrentSubMenu(todosLen - 1);
         } else {
-          this.menu.setCurrentSubMenu(this.menu.getCurrentSubMenu() - 1);
+          this.menu.setCurrentSubMenu(currentSubMenuSelection - 1);
         }
       }
     }
   }
 
-  async isMenuMoving(key: any, currScreen: string, currentMenuSelection: number) {
+  async isMenuMoving(key: any, currScreen: string, currentMenuSelection: number, currentSubMenuSelection: number) {
     const server = new Server();
     const getTodos: any = await server.getTodos();
     const todos = getTodos.filter((item: any) => !item.parentTodoId);
     const todosLen: any = todos?.length ? todos.length : 0;
+    const currentTodo = todos[currentMenuSelection];
+    const subTodos = getTodos?.filter((item: any) => item.parentTodoId === currentTodo.id);
+    const subTodosLen = subTodos.length;
 
-    this.isSubTodoUpDown(key, currScreen, currentMenuSelection);
+    this.screen.setCurrentScreen(currScreen);
+    this.isSubTodoUpDown(key, currScreen, currentSubMenuSelection, subTodosLen);
     this.isTodoUpDown(key, currScreen, currentMenuSelection, todosLen);
   }
   async isTriggered() {

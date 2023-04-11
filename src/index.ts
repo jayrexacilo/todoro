@@ -54,8 +54,11 @@ process.stdin.on('keypress', async (char, key) => {
 
   if(await todoListMovements.isTriggered()) {
     const currentMenuSelection: number = menu.getCurrentMenu();
+    const currentSubMenuSelection: number = menu.getCurrentSubMenu();
     const currScreen = screen.getCurrentScreen();
-    await todoListMovements.isMenuMoving(key, currScreen, currentMenuSelection);
+    await todoListMovements.isMenuMoving(key, currScreen, currentMenuSelection, currentSubMenuSelection);
+    await onScreenStateChange.isShowMainOrSubTodoScreen();
+    return;
   }
 
   if(await onScreenStateChange.isSetFocusTimerState(key)) return;
@@ -65,5 +68,5 @@ process.stdin.on('keypress', async (char, key) => {
   if(await onScreenStateChange.isAddSubTodo(key)) return;
   if(await onScreenStateChange.isEditTodo(key)) return;
   if(await onScreenStateChange.isDeleteTodo(key)) return;
-  await onScreenStateChange.isShowMainOrSubTodoScreen();
+  onScreenStateChange.isShowMainOrSubTodoScreen();
 });

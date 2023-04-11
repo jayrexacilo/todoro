@@ -23,8 +23,11 @@ class HotKeyManager {
     if(keyName === 'x') process.exit();
   }
 
-  isGotoSubTodo(keyName: string) {
-    if(keyName === 'tab' && this.todos.getTodoLen()) {
+  async isGotoSubTodo(keyName: string) {
+    const getTodos = await this.server.getTodos();
+    const todos = getTodos.filter((item: any) => !item.parentTodoId);
+    const todosLen = todos?.length
+    if(keyName === 'tab' && todosLen) {
       this.menu.setCurrentSubMenu(0);
       if(this.screen.getCurrentScreen() === 'SUBTODO') {
         this.screen.setCurrentScreen('MAIN_SCREEN');

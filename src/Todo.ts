@@ -58,7 +58,7 @@ class Todo {
   }
   async getTodoByIdx(idx: number): Promise<todoTypeS> {
     const todos: todoTypeS[] = await this.server.getTodos();
-    const currTodo: todoTypeS = todos[idx];
+    const currTodo: todoTypeS = todos.filter((item: any) => !item.parentTodoId)[idx];
     return new Promise<todoTypeS>((resolve, reject) => {
       resolve(currTodo);
     });
