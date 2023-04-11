@@ -42,6 +42,7 @@ class Screen {
   }
   async showMainScreen(currentMenu: number, currentSubMenu: number) {
     const _todos: any = await this.server.getTodos();
+
     if(this.currentScreen !== 'SUBTODO') this.currentScreen = 'MAIN_SCREEN';
     clear();
     if(_todos?.length) {
