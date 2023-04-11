@@ -79,11 +79,16 @@ class Todo {
     }
     this.server.updateTodo(currTodo.id, isDone);
   }
-  toggleSubTodoStatus(idx: number, subIdx: number) {
-    this.todos[idx].isDone = false;
-    this.todos[idx].subTodo[subIdx].isDone = !this.todos[idx].subTodo[subIdx].isDone;
-    const isAllSubTodosDone = !this.todos[idx].subTodo.filter(i => !i.isDone).length;
-    if(isAllSubTodosDone) this.todos[idx].isDone = true;
+  async toggleSubTodoStatus(idx: number, subIdx: number) {
+    const getTodos = await this.server.getTodos();
+    const currentTodo = getTodos.filter((item: any) => !item.parentTodoId)[idx];
+    const subTodos = getTodos.filter((item: any) => item.parentTodoId === currentTodo.id);
+    const currSubTodo = subTodos[subIdx];
+    this.server.updateTodo(currSubTodo.id, !currSubTodo.isDone);
+
+    subTodos[subIdx].isDone = !currSubTodo.isDone;
+    const isAllSubTodosDone = subTodos?.filter((item: any) => item.isDone).length === subTodos.length;
+    this.server.updateTodo(currentTodo.id, isAllSubTodosDone);
   }
   getTodoLen() {
     return this.todos?.length;
