@@ -41,8 +41,8 @@ class HotKeyManager {
       }
     }
   }
-  isStartFocusTimer(keyName: string) {
-    if(keyName === 's' && this.todos.getTodoLen()) {
+  async isStartFocusTimer(keyName: string) {
+    if(keyName === 's' && await this.todos.getTodoLen()) {
       this.screen.setCurrentScreen('START_FOCUS');
       this.timer.startFocusTimer();
       let currTodo: any = this.todos.getTodoByIdx(this.menu.getCurrentMenu());
@@ -83,8 +83,8 @@ class HotKeyManager {
       this.screen.setIsUserInputMode(true);
     }
   }
-  isEditTodo(keyName: string) {
-    if(keyName === 'e' && this.todos.getTodoLen()) {
+  async isEditTodo(keyName: string) {
+    if(keyName === 'e' && await this.todos.getTodoLen()) {
       this.screen.setCurrentScreen(this.menu.menuType === 'mainmenu' ? 'EDIT_TODO' : 'EDIT_SUBTODO');
       this.screen.setIsUserInputMode(true);
     }

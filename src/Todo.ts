@@ -92,8 +92,10 @@ class Todo {
     const isAllSubTodosDone = subTodos?.filter((item: any) => item.isDone).length === subTodos.length;
     this.server.updateTodo(currentTodo.id, isAllSubTodosDone);
   }
-  getTodoLen() {
-    return this.todos?.length;
+  async getTodoLen() {
+    const getTodos = await this.server.getTodos();
+    const todos = getTodos.filter((item: any) => !item.parentTodoId);
+    return todos?.length || 0;
   }
 }
 

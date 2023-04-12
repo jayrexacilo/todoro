@@ -48,7 +48,7 @@ process.stdin.on('keypress', async (char, key) => {
     hkey.isAddSubTodo(keyName);
     hkey.isEditTodo(keyName);
     hkey.isDeleteTodo(keyName);
-    if(hkey.isStartFocusTimer(keyName)) return;
+    if(await hkey.isStartFocusTimer(keyName)) return;
     if(hkey.isStartBreakTimer(keyName)) return;
   }
 
