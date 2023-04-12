@@ -24,10 +24,13 @@ class HotKeyManager {
   }
 
   async isGotoSubTodo(keyName: string) {
+    const currIdx: number = this.menu.getCurrentMenu();
     const getTodos = await this.server.getTodos();
     const todos = getTodos.filter((item: any) => !item.parentTodoId);
     const todosLen = todos?.length
-    if(keyName === 'tab' && todosLen) {
+    const currTodo = todos[currIdx];
+    const subTodos = getTodos.filter((item: any) => item.parentTodoId === currTodo.id);
+    if(keyName === 'tab' && todosLen && subTodos?.length) {
       this.menu.setCurrentSubMenu(0);
       if(this.screen.getCurrentScreen() === 'SUBTODO') {
         this.screen.setCurrentScreen('MAIN_SCREEN');
