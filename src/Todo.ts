@@ -72,8 +72,13 @@ class Todo {
   async getServerTodos() {
     return await this.server.getTodos();
   }
-  getTodos() {
-    return this.todos;
+  async getTodos() {
+    const getTodos = await this.server.getTodos();
+    const todos = getTodos?.filter((item: any) => item.parentTodoId);
+    return todos;
+  }
+  async getSubTodos() {
+    return await this.server.getSubTodos();
   }
   async toggleTodoStatus(idx: number) {
     const getTodos = await this.server.getTodos();

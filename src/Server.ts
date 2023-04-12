@@ -63,6 +63,15 @@ class Server {
       });
     });
   }
+  getSubTodos(): Promise<todoTypeS[]> {
+    const $db = this.db;
+    return new Promise((resolve, reject) => {
+      $db.all('SELECT * FROM todos WHERE parentTodoId IS NOT NULL', [], (err, rows: todoTypeS[]) => {
+        if(err) reject(err);
+        resolve(rows);
+      });
+    });
+  }
 }
 
 export default Server;

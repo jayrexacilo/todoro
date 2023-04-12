@@ -46,8 +46,11 @@ class HotKeyManager {
       this.screen.setCurrentScreen('START_FOCUS');
       this.timer.startFocusTimer();
       let currTodo: any = await this.todos.getTodoByIdx(this.menu.getCurrentMenu());
-      currTodo = this.menu.menuType === 'submenu' ? currTodo.subTodo[this.menu.currentSubMenu].todo : currTodo.todo;
-      this.timer.timerDisplay(this.timer.focusTimerCount, currTodo, 'focus');
+      const getSubTodos = await this.todos.getSubTodos();
+      const subTodos = getSubTodos?.filter((item: any) => item.parentTodoId === currTodo.id);
+      if(!currTodo && !subTodos?.length) return;
+      const currTodoText = this.menu.menuType === 'submenu' ? subTodos[this.menu.getCurrentSubMenu()].todo : currTodo.todo;
+      this.timer.timerDisplay(this.timer.focusTimerCount, currTodoText, 'focus');
       return true;
     }
     return false;

@@ -73,9 +73,12 @@ class ScreenStateTrigger {
               this.timer.startBreakTimer();
               break;
           }
-          let currTodo: any = this.todos.getTodoByIdx(this.menu.getCurrentMenu());
-          currTodo = this.menu.menuType === 'submenu' ? currTodo.subTodo[this.menu.currentSubMenu].todo : isToggleBreakTimer ? '' : currTodo.todo;
-          this.timer.timerDisplay(this.timer.timerCount, currTodo, this.screen.getCurrentScreen() === 'START_FOCUS' ? 'focus' : 'break');
+          let currTodo: any = await this.todos.getTodoByIdx(this.menu.getCurrentMenu());
+          const getSubTodos = await this.todos.getSubTodos();
+          const subTodos = getSubTodos?.filter((item: any) => item.parentTodoId === currTodo.id);
+          if(!currTodo && !subTodos?.length) return;
+          const currTodoText = this.menu.menuType === 'submenu' ? subTodos[this.menu.getCurrentSubMenu()].todo : currTodo.todo;
+          this.timer.timerDisplay(this.timer.timerCount, currTodoText, this.screen.getCurrentScreen() === 'START_FOCUS' ? 'focus' : 'break');
           return true;
         }
         if(!this.timer.checkTimerStatus().isTimerPaused) {
