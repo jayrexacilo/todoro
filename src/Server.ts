@@ -23,6 +23,15 @@ class Server {
       if(err) return console.log(`INSERT FAILED! `, err);
     });
   }
+  updateTodoText(todoId: number, text: string) {
+    const updateSql = `UPDATE todos SET todo="${text}" WHERE id=?`;
+    return new Promise((resolve, reject) => {
+      this.db.run(updateSql, [todoId], err => {
+        if(err) return reject(err);
+        resolve(1);
+      });
+    });
+  }
   updateTodo(todoId: number, isDone: boolean) {
     const updateSql = `UPDATE todos SET isDone=${isDone} WHERE id=?`;
     return new Promise((resolve, reject) => {

@@ -50,11 +50,17 @@ class Todo {
     const deleteTodo = await this.server.deleteTodo(todo.id);
     return deleteTodo;
   }
-  updateTodo(todo: string, idx: number) {
-    this.todos[idx].todo = todo;
+  async updateTodo(todo: string, idx: number) {
+    const getTodos = await this.server.getTodos();
+    const currTodo = getTodos.filter((item: any) => !item.parentTodoId)[idx];
+    this.server.updateTodoText(currTodo.id, todo);
   }
-  updateSubTodo(todo: string, idx: number, subidx: number) {
-    this.todos[idx].subTodo[subidx].todo = todo;
+  async updateSubTodoText(todo: string, idx: number, subidx: number) {
+    const getTodos = await this.server.getTodos();
+    const currTodo = getTodos.filter((item: any) => !item.parentTodoId)[idx];
+    const subTodos = getTodos.filter((item: any) => item.parentTodoId === currTodo.id);
+    const currSubTodo = subTodos[subidx];
+    this.server.updateTodoText(currSubTodo.id, todo);
   }
   async getTodoByIdx(idx: number): Promise<todoTypeS> {
     const todos: todoTypeS[] = await this.server.getTodos();

@@ -157,21 +157,28 @@ class ScreenStateTrigger {
             this.todos.updateTodo(this.screen.getInputValue(), this.menu.getCurrentMenu());
             break;
           case 'EDIT_SUBTODO':
-            this.todos.updateSubTodo(this.screen.getInputValue(), this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
+            await this.todos.updateSubTodoText(this.screen.getInputValue(), this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
             this.menu.menuType = 'submenu';
             this.screen.setCurrentScreen('SUBTODO');
             break;
         }
-        await this.screen.showMainScreen(this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
-        this.screen.setIsUserInputMode(false);
-        this.screen.clearUserInputValue();
+        setTimeout(async () => {
+          await this.screen.showMainScreen(this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
+          this.screen.setIsUserInputMode(false);
+          this.screen.clearUserInputValue();
+        }, 50);
         return true;
       }
 
-      let currTodo: any = this.todos.getTodoByIdx(this.menu.getCurrentMenu());
-      currTodo = this.menu.menuType === 'submenu' ? currTodo.subTodo[this.menu.currentSubMenu].todo : currTodo.todo;
-      if(this.menu.menuType === 'submenu') return this.screen.onEditSubTodo(key.sequence, key.name, currTodo);
-      this.screen.onEditTodo(key.sequence, key.name, currTodo);
+      let currTodo: any = await this.todos.getTodoByIdx(this.menu.getCurrentMenu());
+      const getSubTodos = await this.todos.getSubTodos();
+      const subTodos = getSubTodos?.filter((item: any) => item.parentTodoId === currTodo.id);
+      //currTodo = this.menu.menuType === 'submenu' ? currTodo.subTodo[this.menu.currentSubMenu].todo : currTodo.todo;
+      if(this.menu.menuType === 'submenu' && subTodos?.length) {
+        const currSubTodo = subTodos[this.menu.getCurrentSubMenu()];
+        return this.screen.onEditSubTodo(key.sequence, key.name, currSubTodo.todo);
+      }
+      this.screen.onEditTodo(key.sequence, key.name, currTodo.todo);
       return true;
     }
     return false;
