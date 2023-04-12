@@ -95,8 +95,10 @@ class HotKeyManager {
     const todosLen = todos?.length
     if(keyName === 'd' && todosLen) {
       const getTodo = await this.todos.getTodoByIdx(this.menu.getCurrentMenu());
-      this.screen.setCurrentScreen('DELETE_TODO');
-      this.screen.onDeleteTodo(getTodo.todo);
+      setTimeout(() => {
+        this.screen.setCurrentScreen('DELETE_TODO');
+        this.screen.onDeleteTodo(getTodo.todo);
+      }, 80);
     }
   }
   async isToggleTodoStatus(keyName: string, key: any) {

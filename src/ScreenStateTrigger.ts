@@ -180,12 +180,12 @@ class ScreenStateTrigger {
     if(this.screen.getCurrentScreen() === 'DELETE_TODO') {
       if(key.sequence === 'y') {
         await this.todos.deleteTodo(this.menu.getCurrentMenu());
-        setTimeout(() => {
-          this.menu.setCurrentMenu(this.menu.getCurrentMenu() > 1 ? this.menu.getCurrentMenu() - 1 : 0);
-        }, 300);
+        this.menu.setCurrentMenu(this.menu.getCurrentMenu() > 1 ? this.menu.getCurrentMenu() - 1 : 0);
       }
       if(['n', 'y'].includes(key.sequence)) {
-        await this.screen.showMainScreen(this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
+        setTimeout(() => {
+          this.screen.showMainScreen(this.menu.getCurrentMenu(), this.menu.getCurrentSubMenu());
+        }, 100);
       }
       return true;
     }

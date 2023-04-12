@@ -58,7 +58,6 @@ process.stdin.on('keypress', async (char, key) => {
     const currScreen = screen.getCurrentScreen();
     await todoListMovements.isMenuMoving(key, currScreen, currentMenuSelection, currentSubMenuSelection);
     await onScreenStateChange.isShowMainOrSubTodoScreen();
-    return;
   }
 
   if(await onScreenStateChange.isSetFocusTimerState(key)) return;
