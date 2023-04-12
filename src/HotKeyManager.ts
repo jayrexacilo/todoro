@@ -45,7 +45,7 @@ class HotKeyManager {
     if(keyName === 's' && await this.todos.getTodoLen()) {
       this.screen.setCurrentScreen('START_FOCUS');
       this.timer.startFocusTimer();
-      let currTodo: any = this.todos.getTodoByIdx(this.menu.getCurrentMenu());
+      let currTodo: any = await this.todos.getTodoByIdx(this.menu.getCurrentMenu());
       currTodo = this.menu.menuType === 'submenu' ? currTodo.subTodo[this.menu.currentSubMenu].todo : currTodo.todo;
       this.timer.timerDisplay(this.timer.focusTimerCount, currTodo, 'focus');
       return true;
